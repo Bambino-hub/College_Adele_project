@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block importmap %}
+
+	{# on charge le js et le css global #}
+	{{ parent() }}
+
+	{# On charge le js et le css des enseignants #}
+	{{ importmap('teachers') }}
+{% endblock %}
+
+
+{% block title %}Edit Teatchers
+{% endblock %}
+
+{% block body %}
+	<div class="teachers-page teachers-edit">
+		<h1 class="teachers-title text-center">Editer l'enseignant</h1>
+
+		<div class="d-flex gap-3 mb-3 teachers-edit-actions">
+			<a href="{{ path('teatchers_index') }}" class="btn btn-secondary">Retour à la liste</a>
+			{{ include('teatchers/_delete_form.html.twig') }}
+
+		</div>
+
+		<div class="teachers-form-wrapper">
+			{{ include('teatchers/_form.html.twig', {'button_label': 'Update'}) }}
+		</div>
+
+	</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block importmap %}
+
+	{# on charge le js et le css global #}
+	{{ parent() }}
+
+	{# On charge le js et le css des enseignants #}
+	{{ importmap('teachers') }}
+{% endblock %}
+
+
+{% block title %}
+	Ajouter un enseignant
+{% endblock %}
+
+{% block body %}
+	<div class="teachers-page teachers-new">
+		<h1 class="teachers-title">Ajouter un enseignant</h1>
+
+		<a href="{{ path('teatchers_index') }}" class="btn btn-secondary teachers-back-btn">Retour à la liste</a>
+
+		<div
+			class="teachers-form-wrapper">
+
+			{# Le formulaire qui sera directement injecter dans la page des liste des enseignants #}
+			<turbo-frame id="teacher">
+
+				{{ include('teatchers/_form.html.twig') }}
+			</turbo-frame>
+		</div>
+	</div>
+{% endblock %}

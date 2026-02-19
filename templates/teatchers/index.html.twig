@@ -1,0 +1,81 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des enseignants du Collège Adèle
+{% endblock %}
+
+{% block importmap %}
+
+	{# on charge le js et le css global #}
+	{{ parent() }}
+
+	{# On charge le js et le css des enseignants #}
+	{{ importmap('teachers') }}
+{% endblock %}
+
+{% block body %}
+
+	<div class="teachers-page teachers-index">
+		<h1 class="teachers-title text-center	">Liste des enseignants du Collège Adèle</h1>
+
+		{# barre d'outils située au dessus du tableau #}
+		<div class="teachers-toolbar row mb-3">
+			<div class=" d-flex gap-2">
+				<a href="#" class="btn btn-secondary">Exporter les enseignants</a>
+
+				<a href="#" class="btn btn-secondary">Enseignants du college</a>
+
+				<a href="#" class="btn btn-secondary">Enseignants du lycée</a>
+
+				<a href="#" class="btn btn-secondary">Stagiaires</a>
+				<a href="#" class="btn btn-secondary">Stagiaires</a>
+			</div>
+
+			{# Frame turbo pour charger la page d'ajout #}
+			<turbo-frame id="teacher">
+				<a href="{{ path('teatchers_create') }}" class="btn btn-primary">Créer un nouvel enseignant</a>
+			</turbo-frame>
+
+			{# conteneur responsive pour le tableau #}
+		</div>
+
+		{# conteneur responsive pour le tableau #}
+		<div class="teachers-table-container table-responsive">
+			<table class="table table-success table-striped teachers-table">
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Nom</th>
+						<th>Prénom</th>
+						<th>Téléphone</th>
+						<th>Email</th>
+						<th>actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for teatcher in teatchers %}
+						<tr>
+							<td>{{ teatcher.id }}</td>
+							<td>{{ teatcher.lastname }}</td>
+							<td>{{ teatcher.firstname }}</td>
+							<td>{{ teatcher.phoneNumber }}</td>
+							<td>{{ teatcher.email }}</td>
+							<td class="d-flex gap-3 teachers-action-cell">
+								<a href="{{ path('teatchers_show', {'id': teatcher.id}) }}" class="btn btn-info ">show</a>
+
+								{# Utilisation de turbo pour injecter la page d'edition #}
+								<a href="{{ path('teatchers_edit', {'id': teatcher.id}) }}" class="btn btn-warning">edit</a>
+								{{ include('teatchers/_delete_form.html.twig') }}
+
+							</td>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="6">no records found</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+{% endblock %}

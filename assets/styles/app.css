@@ -1,3 +1,180 @@
-body {
-    background-color: skyblue;
-}
+
+  /* ===============================
+           COULEURS DU LOGO COLLEGE ADELE
+    ================================= */
+  :root {
+      --violet-main: #7a3fa1;
+      --violet-dark: #5f2d82;
+      --green-main: #0f7a3a;
+      --white-main: #ffffff;
+      --accent-orange: #e85d04;
+  }
+
+  /* ===============================
+           NAVBAR
+     ================================= */
+  body {
+      padding-top: 90px;
+      /* espace pour navbar fixed */
+  }
+
+  .custom-navbar {
+      background-color: var(--violet-main);
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .logo {
+      height: 64px;
+      width: auto;
+      transition: transform 0.22s ease, filter 0.22s ease;
+  }
+
+  /* Agrandissement au survol du logo */
+  .navbar-brand:hover .logo,
+  .logo:hover {
+      transform: scale(1.12);
+  }
+
+  .school-name {
+      color: var(--white-main);
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: 0.5px;
+  }
+
+  .navbar-nav .nav-link {
+      color: var(--white-main);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-left: 18px;
+      transition: transform 0.22s ease, color 0.22s ease, text-shadow 0.22s ease;
+  }
+
+  .navbar-nav .nav-link:hover,
+  .navbar-nav .nav-link.active {
+      color: var(--accent-orange);
+      transform: translateY(-3px) scale(1.02);
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+      font-weight: 800;
+      background-color: rgba(255, 255, 255, 0.08);
+      padding: 6px 10px;
+      border-radius: 6px;
+  }
+
+  .navbar-toggler {
+      border-color: var(--white-main);
+  }
+
+  .navbar-toggler-icon {
+      filter: invert(1);
+  }
+
+  /* ===============================
+           RESPONSIVE
+     ================================= */
+  @media (max-width: 768px) {
+      .school-name {
+          font-size: 1rem;
+      }
+
+      .navbar-nav .nav-link {
+          margin-left: 0;
+          padding: 12px 0;
+          font-size: 1rem;
+      }
+  }
+
+  /* ===============================
+           HERO / BACKGROUND LOGO
+  ================================= */
+  .hero {
+      position: relative;
+      padding: 3.5rem 1rem;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0));
+      border-radius: 8px;
+  }
+
+  /* use pseudo-element for faint logo in background */
+  .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("../img/logo.png"); 
+      /* background-repeat: no-repeat; */
+      background-position: center center;
+      background-size: contain;
+      background-attachment: fixed;
+      opacity: 0.18;
+      pointer-events: none;
+      filter: saturate(0.6) brightness(0.95);
+  }
+
+  .hero-inner {
+      position: relative;
+      z-index: 2;
+  }
+
+  .hero-title {
+      color: var(--violet-dark);
+      font-weight: 800;
+      font-size: 2.2rem;
+      letter-spacing: 1px;
+      text-shadow: 0 6px 18px rgba(122, 63, 161, 0.06);
+      margin-bottom: 0.75rem;
+  }
+
+  .hero-paragraph {
+      display: inline-block;
+      margin: 0;
+      padding: 0.25rem 0.5rem;
+      color: var(--violet-dark);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+  }
+
+  /* marquee */
+  .marquee {
+      width: 100%;
+      overflow: hidden;
+      box-sizing: border-box;
+      margin-top: 0.5rem;
+      border-radius: 6px;
+  }
+
+  .marquee__inner {
+      display: inline-flex;
+      gap: 3rem;
+      white-space: nowrap;
+      will-change: transform;
+  }
+
+  /* responsive tweaks */
+  @media (max-width: 992px) {
+      .hero::before {
+          background-size: cover;
+          background-position: center center;
+          opacity: 0.18;
+      }
+
+      .hero-title {
+          font-size: 1.8rem;
+      }
+  }
+
+  @media (max-width: 576px) {
+      .hero::before {
+          background-size: cover;
+          background-position: center center;
+          opacity: 0.16;
+      }
+
+      .hero-title {
+          font-size: 1.4rem;
+      }
+
+      .marquee__inner {
+          gap: 1.6rem;
+      }
+  }

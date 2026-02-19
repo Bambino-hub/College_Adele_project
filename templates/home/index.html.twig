@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Adele - Accueil
+{% endblock %}
+
+
+{% block body %}
+	<main class="container-fluid hero">
+		<div class="hero-inner text-center">
+			<h1 class="hero-title mt-4">Bienvenue au Collège Adèle</h1>
+
+			<div class="marquee" aria-label="Annonce">
+				<div class="marquee__inner">
+					<p class="hero-paragraph">Succès, Vertu EN Esprit DE Famille</p>
+				</div>
+				<p>
+					Lorem, ipsum dolor sit amet consectetur adipisicing elit. Id amet
+									       delectus sunt porro maxime, illo quod magni impedit? Debitis
+										 accusamus voluptas nesciunt soluta eius magnam harum nihil officiis
+										  vitae corrupti.
+					<img src="{{ asset('img/logo.png')}}" alt="">
+				</p>
+			</div>
+		</div>
+	</main>
+
+{% endblock %}

@@ -1,0 +1,140 @@
+/* teachers.css
+   --------------------------------------------------
+   This stylesheet contains all custom styles for the
+   "teachers" views (index, new, edit, show). The file
+   is written mobile-first with responsive tweaks and
+   every section is commented as requested.
+*/
+
+/* === generic page wrapper === */
+.teachers-page {
+    padding: 1rem;              /* spacing around content */
+    background-color: #f9f9f9;  /* light background to distinguish section */
+}
+
+/* each page can have a modifier class if needed */
+/* .teachers-index {}
+.teachers-new {}
+.teachers-edit {}
+.teachers-show {} */
+
+/* === headings === */
+.teachers-title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+/* === toolbar buttons above tables/forms === */
+.teachers-toolbar .btn {
+    margin-bottom: 0.5rem;  /* ensure vertical spacing on small screens */
+}
+
+.teachers-back-btn {
+    margin-bottom: 1rem;
+}
+
+/* === responsive table container === */
+.teachers-table-container {
+    overflow-x: auto;     /* allow horizontal scroll on narrow devices */
+}
+
+.teachers-table th,
+.teachers-table td {
+    vertical-align: middle;
+}
+
+.teachers-action-cell a {
+    white-space: nowrap;
+}
+
+/* === forms === */
+.teachers-form-wrapper {
+    max-width: 600px;
+    margin-top: 1rem;
+}
+
+
+/* form container and base form element */
+.teachers-form {
+    background: #ffffff;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.04);
+}
+
+/* Symfony form root element (form tag) */
+.teachers-form-element {
+    display: block;
+}
+
+/* add spacing to individual form groups if Symfony does not already */
+.teachers-form .form-group {
+    margin-bottom: 1rem;
+}
+
+/* labels and inputs */
+.teachers-form label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.teachers-form input[type="text"],
+.teachers-form input[type="email"],
+.teachers-form input[type="number"],
+.teachers-form input[type="password"],
+.teachers-form textarea,
+.teachers-form select {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.teachers-form textarea { min-height: 100px; }
+
+/* helper text / errors */
+.teachers-form .help-text,
+.teachers-form .form-error {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.875rem;
+}
+
+/* make sure the submit button is separated from fields */
+.teachers-submit-btn {
+    margin-top: 0.5rem;
+}
+
+/* delete form styling */
+.teachers-delete-form {
+    display: inline-block; /* keep delete button inline with others */
+}
+
+.teachers-delete-btn {
+    font-size: 0.9rem;
+    padding: 0.35rem 0.6rem;
+}
+
+/* === responsive adjustments === */
+@media (max-width: 768px) {
+    .teachers-title {
+        font-size: 1.5rem;
+    }
+    .teachers-toolbar .btn {
+        width: 100%;          /* stack toolbar buttons on small screens */
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .teachers-table td,
+    .teachers-table th {
+        font-size: 0.9rem;     /* slightly smaller text on very small screens */
+    }
+}
+
+
