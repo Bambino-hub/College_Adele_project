@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\MatterRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: MatterRepository::class)]
+class Matter
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $nom = null;
+
+    /**
+     * @var Collection<int, Enseignement>
+     */
+    #[ORM\OneToMany(targetEntity: Enseignement::class, mappedBy: 'matter')]
+    private Collection $enseignements;
+
+    public function __construct()
+    {
+        $this->enseignements = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Enseignement>
+     */
+    public function getEnseignements(): Collection
+    {
+        return $this->enseignements;
+    }
+
+    public function addEnseignement(Enseignement $enseignement): static
+    {
+        if (!$this->enseignements->contains($enseignement)) {
+            $this->enseignements->add($enseignement);
+            $enseignement->setMatter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnseignement(Enseignement $enseignement): static
+    {
+        if ($this->enseignements->removeElement($enseignement)) {
+            // set the owning side to null (unless already changed)
+            if ($enseignement->getMatter() === $this) {
+                $enseignement->setMatter(null);
+            }
+        }
+
+        return $this;
+    }
+}

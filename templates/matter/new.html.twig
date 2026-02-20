@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Matter{% endblock %}
+
+{% block body %}
+    <h1>Create new Matter</h1>
+
+    {{ include('matter/_form.html.twig') }}
+
+    <a href="{{ path('app_matter_index') }}">back to list</a>
+{% endblock %}

@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\TeatchersRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -30,6 +32,17 @@ class Teatchers
     #[Assert\NotBlank(message: "L'email est requis")]
     #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
     private ?string $email = null;
+
+    /**
+     * @var Collection<int, Enseignement>
+     */
+    #[ORM\OneToMany(targetEntity: Enseignement::class, mappedBy: 'teacher')]
+    private Collection $enseignements;
+
+    public function __construct()
+    {
+        $this->enseignements = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -80,6 +93,36 @@ class Teatchers
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Enseignement>
+     */
+    public function getEnseignement(): Collection
+    {
+        return $this->enseignements;
+    }
+
+    public function addEnseignement(Enseignement $enseignements): static
+    {
+        if (!$this->enseignements->contains($enseignements)) {
+            $this->enseignements->add($enseignements);
+            $enseignements->setTeacher($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEnseignement(Enseignement $enseignements): static
+    {
+        if ($this->enseignements->removeElement($enseignements)) {
+            // set the owning side to null (unless already changed)
+            if ($enseignements->getTeacher() === $this) {
+                $enseignements->setTeacher(null);
+            }
+        }
 
         return $this;
     }
