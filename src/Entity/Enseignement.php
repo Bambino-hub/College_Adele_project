@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Serializer\Attribute\Groups;
 use App\Repository\EnseignementRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -11,15 +12,19 @@ class Enseignement
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Enseignement:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'className')]
+    #[Groups(['Enseignement:read'])]
     private ?Teatchers $teacher = null;
 
     #[ORM\ManyToOne(inversedBy: 'enseignements')]
+    #[Groups(['Enseignement:read'])]
     private ?ClassName $className = null;
 
     #[ORM\ManyToOne(inversedBy: 'enseignements')]
+    #[Groups(['Enseignement:read'])]
     private ?Matter $matter = null;
 
     public function getId(): ?int

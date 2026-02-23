@@ -23,6 +23,10 @@ return [
         'path' => './assets/js/teachers/teachers.js',
         'entrypoint' => true,
     ],
+    'enseignement' => [
+        'path' => './assets/js/enseignement/enseignement.js',
+        'entrypoint' => true,
+    ],
     '@hotwired/stimulus' => [
         'version' => '3.2.2',
     ],

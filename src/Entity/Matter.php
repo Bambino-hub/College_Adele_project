@@ -6,6 +6,7 @@ use App\Repository\MatterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: MatterRepository::class)]
 class Matter
@@ -13,9 +14,11 @@ class Matter
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Enseignement:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['Enseignement:read'])]
     private ?string $nom = null;
 
     /**

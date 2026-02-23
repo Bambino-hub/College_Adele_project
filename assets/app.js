@@ -14,6 +14,8 @@ import "bootstrap";
 // import css
 import "./styles/app.css";
 
+import { fetchJSON } from "./js/functions.js";
+
 // js pour faire defiler la devise  sur la page d'accueil
 document.addEventListener("DOMContentLoaded", function () {
     const marquee = document.querySelector(".marquee");
@@ -58,4 +60,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     window.addEventListener("resize", onResize);
     start();
+});
+
+const enseigneElement = fetchJSON("/enseignement");
+enseigneElement.then((data) => {
+    data.forEach((item) => {
+        console.log(item.teacher.lastname);
+    });
 });

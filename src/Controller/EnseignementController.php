@@ -7,6 +7,7 @@ use App\Form\EnseignementType;
 use App\Repository\EnseignementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -15,11 +16,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class EnseignementController extends AbstractController
 {
     #[Route(name: 'app_enseignement_index', methods: ['GET'])]
-    public function index(EnseignementRepository $enseignementRepository): Response
+    public function index(EnseignementRepository $enseignementRepository): JsonResponse
     {
-        return $this->render('enseignement/index.html.twig', [
-            'enseignements' => $enseignementRepository->findAll(),
-        ]);
+        // return $this->render('enseignement/index.html.twig', [
+        //     'enseignements' => $enseignementRepository->findAll(),
+        // ]);
+        return $this->json($enseignementRepository->findAll(), Response::HTTP_OK, [], ['groups' => 'Enseignement:read']);
     }
 
     #[Route('/new', name: 'app_enseignement_new', methods: ['GET', 'POST'])]
@@ -71,7 +73,7 @@ final class EnseignementController extends AbstractController
     #[Route('/{id}', name: 'app_enseignement_delete', methods: ['POST'])]
     public function delete(Request $request, Enseignement $enseignement, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$enseignement->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $enseignement->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($enseignement);
             $entityManager->flush();
         }

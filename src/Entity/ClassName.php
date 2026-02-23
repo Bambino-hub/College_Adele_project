@@ -6,6 +6,7 @@ use App\Repository\ClassNameRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ClassNameRepository::class)]
 class ClassName
@@ -13,9 +14,11 @@ class ClassName
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Enseignement:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['Enseignement:read'])]
     private ?string $name = null;
 
     /**

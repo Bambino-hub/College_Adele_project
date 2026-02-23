@@ -3,6 +3,15 @@
 {% block title %}Enseignement index
 {% endblock %}
 
+{% block importmap %}
+
+	{# on charge le js et le css global #}
+	{{ parent() }}
+
+	{# On charge le js de enseignement #}
+	{{ importmap('enseignement') }}
+{% endblock %}
+
 {% block body %}
 	<h1>Enseignement index</h1>
 

@@ -6,6 +6,7 @@ use App\Repository\TeatchersRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: TeatchersRepository::class)]
@@ -14,23 +15,28 @@ class Teatchers
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Enseignement:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le nom de famille est requis")]
+    #[Groups(['Enseignement:read'])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le prénom est requis")]
+    #[Groups(['Enseignement:read'])]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le numéro de téléphone est requis")]
+    #[Groups(['Enseignement:read'])]
     private ?string $phoneNumber = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "L'email est requis")]
     #[Assert\Email(message: "L'email '{{ value }}' n'est pas valide")]
+    #[Groups(['Enseignement:read'])]
     private ?string $email = null;
 
     /**
