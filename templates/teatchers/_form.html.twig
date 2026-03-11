@@ -1,6 +1,11 @@
 <div class="teachers-form">
-	{{ form_start(form, {'attr': {'class': 'teachers-form-element'}}) }}
+	{{ form_start(form, {'attr': {'class': 'teachers-form-element', 'action': action|default('') }}) }}
 	{{ form_widget(form) }}
-	<button class="btn btn-primary teachers-submit-btn">{{ button_label|default('Save') }}</button>
+
+	<div class="d-flex gap-3">
+		<button class="btn btn-primary ">{{ button_label|default('Save') }}</button>
+
+		<a href="{{path("teatchers_index")}}" class="btn btn-secondary ">Annuler</a>
+	</div>
 	{{ form_end(form) }}
 </div>

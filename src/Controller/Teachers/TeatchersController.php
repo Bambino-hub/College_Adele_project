@@ -14,6 +14,10 @@ final class TeatchersController extends AbstractController
     public function  __construct(private readonly TeatchersRepository $teatchersRepository) {}
 
     #[Route(name: 'teatchers_index', methods: ['GET'])]
+    /**
+     * cette fonction permet d'afficher la liste des enseignants
+     * @return Response
+     */
     public function index(): Response
     {
         return $this->render('teatchers/index.html.twig', [

@@ -7,7 +7,6 @@ use App\Form\EnseignementType;
 use App\Repository\EnseignementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -16,12 +15,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class EnseignementController extends AbstractController
 {
     #[Route(name: 'app_enseignement_index', methods: ['GET'])]
-    public function index(EnseignementRepository $enseignementRepository): JsonResponse
+    public function index(EnseignementRepository $enseignementRepository): Response
     {
-        // return $this->render('enseignement/index.html.twig', [
-        //     'enseignements' => $enseignementRepository->findAll(),
-        // ]);
-        return $this->json($enseignementRepository->findAll(), Response::HTTP_OK, [], ['groups' => 'Enseignement:read']);
+        return $this->render('enseignement/index.html.twig', [
+            'enseignements' => $enseignementRepository->findAll(),
+        ]);
+        // return $this->json($enseignementRepository->findAll(), Response::HTTP_OK, [], ['groups' => 'Enseignement:read']);
     }
 
     #[Route('/new', name: 'app_enseignement_new', methods: ['GET', 'POST'])]

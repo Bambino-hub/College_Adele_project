@@ -14,6 +14,10 @@ use Symfony\Component\Routing\Attribute\Route;
 final class EdithTeachersController extends AbstractController
 {
     #[Route('/{id}/edit', name: 'teatchers_edit', methods: ['GET', 'POST'])]
+    /**
+     * cette fonction permet de modifier un enseignant
+     * @return Response|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function edit(Request $request, Teatchers $teatcher, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(TeatchersType::class, $teatcher);

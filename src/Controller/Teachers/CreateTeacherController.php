@@ -20,7 +20,14 @@ final class CreateTeacherController extends AbstractController
         private readonly RequestStack $requestStack
     ) {}
 
+
+
     #[Route('/create', name: 'teatchers_create', methods: ['GET', 'POST'])]
+
+    /**
+     * cette fonction permet de creer un nouveau enseignant
+     * @return Response|\Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function new(): Response
     {
         $teatcher = new Teatchers();
@@ -30,6 +37,13 @@ final class CreateTeacherController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($teatcher);
             $this->entityManager->flush();
+
+            // turbo request -> return a turbo-stream response so the list updates
+            if ($this->requestStack->getCurrentRequest()->headers->get('Turbo-Frame')) {
+                return $this->render('teatchers/create.turbo-stream.html.twig', [
+                    'teatcher' => $teatcher,
+                ], new Response('', 200, ['Content-Type' => 'text/vnd.turbo-stream.html']));
+            }
 
             return $this->redirectToRoute('teatchers_index', [], Response::HTTP_SEE_OTHER);
         }

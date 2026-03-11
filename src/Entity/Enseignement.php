@@ -17,14 +17,17 @@ class Enseignement
 
     #[ORM\ManyToOne(inversedBy: 'className')]
     #[Groups(['Enseignement:read'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Teatchers $teacher = null;
 
     #[ORM\ManyToOne(inversedBy: 'enseignements')]
     #[Groups(['Enseignement:read'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?ClassName $className = null;
 
     #[ORM\ManyToOne(inversedBy: 'enseignements')]
     #[Groups(['Enseignement:read'])]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Matter $matter = null;
 
     public function getId(): ?int

@@ -25,9 +25,10 @@
 
 			{# Le formulaire qui sera directement injecter dans la page des liste des enseignants #}
 			<turbo-frame id="teacher">
-
-				{{ include('teatchers/_form.html.twig') }}
+				{{ include('teatchers/_form.html.twig', { 'action': path('teatchers_create') }) }}
 			</turbo-frame>
 		</div>
+
+
 	</div>
 {% endblock %}

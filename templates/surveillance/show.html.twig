@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+	<div class="container mt-4">
+
+		<h2>Tableau de surveillance</h2>
+		<pre>
+    {{ dump(exam) }}
+</pre>
+		<p>
+			<strong>Date :</strong>
+			{{ exam.date|date('d/m/Y') }}
+			<br>
+			<strong>Heure :</strong>
+			{{ exam.heursDebut|date('H:i') }}
+			-
+			{{ exam.heureFin|date('H:i') }}
+		</p>
+
+		<div id="message"></div>
+
+		<button id="generate-btn" onclick="generateSurveillance({{ exam.id }})" class="btn btn-primary mb-3">
+			Générer le tableau
+		</button>
+
+		<table class="table table-bordered table-striped">
+			<thead class="table-dark">
+				<tr>
+					<th>Classe</th>
+					<th>Surveillant</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>
+
+				{% for surveillance in examen.surveillances %}
+					<tr>
+						<td>{{ surveillance.classe.name }}</td>
+
+						<td>
+							{{ surveillance.enseignant.lastname }}
+							{{ surveillance.enseignant.firstname }}
+
+						</td>
+
+						<td>
+							<button class="btn btn-warning btn-sm" onclick="editSurveillance({{ surveillance.id }})">
+								Modifier
+							</button>
+						</td>
+					</tr>
+
+				{% else %}
+
+					<tr>
+						<td colspan="3" class="text-center">
+							Aucun tableau généré.
+						</td>
+					</tr>
+
+				{% endfor %}
+
+			</tbody>
+		</table>
+
+	</div>
+
+{% endblock %}

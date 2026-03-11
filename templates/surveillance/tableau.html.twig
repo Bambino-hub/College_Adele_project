@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+	<div class="container mt-4">
+
+		<h2>Tableau de surveillance</h2>
+
+		<div class="mb-3">
+			<a href="{{ path('surveillance_tableau_export', {'format': 'pdf'}) }}" class="btn btn-primary">Exporter en PDF</a>
+			<!-- <a href="{{ path('surveillance_tableau_export', {'format': 'excel'}) }}" class="btn btn-success">Exporter en Excel</a> -->
+			<a href="{{ path('surveillance_tableau_export', {'format': 'word'}) }}" class="btn btn-info">Exporter en Word</a>
+		</div>
+
+		<table class="table table-bordered table-striped">
+			<thead class="table-dark">
+				<tr>
+					<th>Date</th>
+					<th>6eme</th>
+					<th>5eme</th>
+					<th>4eme</th>
+					<th>3eme</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for date, niveaux in tableau %}
+					<tr>
+						<td>{{ date|date('d/m/Y') }}</td>
+						{# on parcourt dans l’ordre désiré #}
+						{% for niveau in ['6eme','5eme','4eme','3eme'] %}
+							<td>
+								{% if niveaux[niveau] is defined %}
+									<strong>{{ niveaux[niveau].matiere }}</strong><br>
+									{% for s in niveaux[niveau].surveillants %}
+										{{ s }}<br>
+									{% endfor %}
+								{% endif %}
+							</td>
+						{% endfor %}
+					</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

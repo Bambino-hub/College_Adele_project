@@ -34,6 +34,7 @@
 				<a href="{{ path('teatchers_create') }}" class="btn btn-primary">Créer un nouvel enseignant</a>
 			</turbo-frame>
 
+
 			{# conteneur responsive pour le tableau #}
 		</div>
 
@@ -50,7 +51,7 @@
 						<th>actions</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody id="teachers_table_body">
 					{% for teatcher in teatchers %}
 						<tr>
 							<td>{{ teatcher.id }}</td>

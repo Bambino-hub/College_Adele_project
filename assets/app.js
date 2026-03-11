@@ -13,7 +13,7 @@ import "bootstrap";
 
 // import css
 import "./styles/app.css";
-
+import "./js/surveillance.js";
 import { fetchJSON } from "./js/functions.js";
 
 // js pour faire defiler la devise  sur la page d'accueil

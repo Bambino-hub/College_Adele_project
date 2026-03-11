@@ -1,0 +1,28 @@
+<table border="1" style="width: 100%; border-collapse: collapse;">
+	<thead>
+		<tr style="background-color: #343a40; color: white;">
+			<th style="padding: 8px;">Date</th>
+			<th style="padding: 8px;">6eme</th>
+			<th style="padding: 8px;">5eme</th>
+			<th style="padding: 8px;">4eme</th>
+			<th style="padding: 8px;">3eme</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for date, niveaux in tableau %}
+			<tr>
+				<td style="padding: 8px;">{{ date|date('d/m/Y') }}</td>
+				{% for niveau in ['6eme','5eme','4eme','3eme'] %}
+					<td style="padding: 8px;">
+						{% if niveaux[niveau] is defined %}
+							<strong>{{ niveaux[niveau].matiere }}</strong><br>
+							{% for s in niveaux[niveau].surveillants %}
+								{{ s }}<br>
+							{% endfor %}
+						{% endif %}
+					</td>
+				{% endfor %}
+			</tr>
+		{% endfor %}
+	</tbody>
+</table>

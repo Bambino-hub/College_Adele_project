@@ -1,0 +1,23 @@
+<turbo-stream action="append" target="teachers_table_body">
+	<template>
+		<tr>
+			<td>{{ teatcher.id }}</td>
+			<td>{{ teatcher.lastname }}</td>
+			<td>{{ teatcher.firstname }}</td>
+			<td>{{ teatcher.phoneNumber }}</td>
+			<td>{{ teatcher.email }}</td>
+			<td class="d-flex gap-3 teachers-action-cell">
+				<a href="{{ path('teatchers_show', {'id': teatcher.id}) }}" class="btn btn-info">show</a>
+				<a href="{{ path('teatchers_edit', {'id': teatcher.id}) }}" class="btn btn-warning">edit</a>
+				{{ include('teatchers/_delete_form.html.twig') }}
+			</td>
+		</tr>
+	</template>
+</turbo-stream>
+
+{# empty the form frame so it disappears or restore the create button #}
+<turbo-stream action="replace" target="teacher">
+	<template>
+		<a href="{{ path('teatchers_create') }}" class="btn btn-primary">Créer un nouvel enseignant</a>
+	</template>
+</turbo-stream>

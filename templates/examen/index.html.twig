@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Examen index
+{% endblock %}
+
+{% block body %}
+	<h1>Examen index</h1>
+	<div class="d-flex gap-2 mb-3">
+		<a href="{{path("exam_generate_surveillance")}}" class="btn btn-primary">Générer les surveillants</a>
+		<a href="{{path("surveillance_index")}}" class="btn btn-secondary">Voir les surveillants</a>
+		<a href="{{path("surveillance_tableau")}}" class="btn btn-info">Voir le tableau de surveillance</a>
+
+	</div>
+	<table class="table">
+		<thead>
+			<tr>
+				<th>Id</th>
+				<th>Date</th>
+				<th>HeursDebut</th>
+				<th>HeureFin</th>
+				<th>classe</th>
+				<th>actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for examan in examens %}
+				<tr>
+					<td>{{ examan.id }}</td>
+					<td>{{ examan.date ? examan.date|date('Y-m-d') : '' }}</td>
+					<td>{{ examan.heursDebut ? examan.heursDebut|date('H:i:s') : '' }}</td>
+					<td>{{ examan.heureFin ? examan.heureFin|date('H:i:s') : '' }}</td>
+					{% for item in examan.classe %}
+						<td>{{ item.name }}</td>
+					{% endfor %}
+					<td>
+						<a href="{{ path('app_examen_show', {'id': examan.id}) }}">show</a>
+						<a href="{{ path('app_examen_edit', {'id': examan.id}) }}">edit</a>
+					</td>
+				</tr>
+			{% else %}
+				<tr>
+					<td colspan="5">no records found</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+
+	<a href="{{ path('app_examen_new') }}">Create new</a>
+{% endblock %}

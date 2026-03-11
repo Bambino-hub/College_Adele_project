@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/teatchers')]
+
+/**
+ * cette classe permet de supprimer un enseignant
+ */
 final class DeleteTeacherController extends AbstractController
 {
     #[Route('/{id}', name: 'teatchers_delete', methods: ['POST'])]

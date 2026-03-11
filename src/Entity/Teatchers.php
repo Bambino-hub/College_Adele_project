@@ -45,9 +45,16 @@ class Teatchers
     #[ORM\OneToMany(targetEntity: Enseignement::class, mappedBy: 'teacher')]
     private Collection $enseignements;
 
+    /**
+     * @var Collection<int, Surveillance>
+     */
+    #[ORM\OneToMany(targetEntity: Surveillance::class, mappedBy: 'enseignant')]
+    private Collection $surveillances;
+
     public function __construct()
     {
         $this->enseignements = new ArrayCollection();
+        $this->surveillances = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -127,6 +134,36 @@ class Teatchers
             // set the owning side to null (unless already changed)
             if ($enseignements->getTeacher() === $this) {
                 $enseignements->setTeacher(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Surveillance>
+     */
+    public function getSurveillances(): Collection
+    {
+        return $this->surveillances;
+    }
+
+    public function addSurveillance(Surveillance $surveillance): static
+    {
+        if (!$this->surveillances->contains($surveillance)) {
+            $this->surveillances->add($surveillance);
+            $surveillance->setEnseignant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSurveillance(Surveillance $surveillance): static
+    {
+        if ($this->surveillances->removeElement($surveillance)) {
+            // set the owning side to null (unless already changed)
+            if ($surveillance->getEnseignant() === $this) {
+                $surveillance->setEnseignant(null);
             }
         }
 
