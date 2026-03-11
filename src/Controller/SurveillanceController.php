@@ -85,23 +85,21 @@ class SurveillanceController extends AbstractController
         foreach ($surveillances as $s) {
             $date = $s->getExamen()->getDate()->format('Y-m-d');
 
-            foreach ($s->getExamen()->getClasse() as $classe) {
-                // on récupère le nom du niveau (6eme, 5eme...)
-                $niveau = $classe->getNiveau()->getName();
+            // Utiliser la classe spécifique de la surveillance
+            $niveau = $s->getClasse()->getNiveau()->getName();
 
-                if (!isset($tableau[$date][$niveau])) {
-                    $tableau[$date][$niveau] = [
-                        'niveau' => $niveau,
-                        'matiere' => $s->getExamen()->getMatiere()->getNom(),
-                        // utilise un tableau associatif pour forcer l'unicité
-                        'surveillants' => [],
-                    ];
-                }
-
-                // enregistrer par clé pour éviter toute répétition
-                $nom = $s->getEnseignant()->getLastname();
-                $tableau[$date][$niveau]['surveillants'][$nom] = $nom;
+            if (!isset($tableau[$date][$niveau])) {
+                $tableau[$date][$niveau] = [
+                    'niveau' => $niveau,
+                    'matiere' => $s->getExamen()->getMatiere()->getNom(),
+                    // utilise un tableau associatif pour forcer l'unicité
+                    'surveillants' => [],
+                ];
             }
+
+            // enregistrer par clé pour éviter toute répétition
+            $nom = $s->getEnseignant()->getLastname();
+            $tableau[$date][$niveau]['surveillants'][$nom] = $nom;
         }
 
         // convertir les tableaux associatifs en listes simples
