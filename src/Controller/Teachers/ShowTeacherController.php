@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class ShowTeacherController extends AbstractController
 {
 
-    #[Route('/{id}', name: 'teatchers_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'teatchers_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     /**
      * cette fonction permet d'afficher les details d'un enseignant
      * @return Response

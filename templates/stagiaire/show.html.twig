@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Stagiaire
+{% endblock %}
+
+{% block body %}
+	<div class="container mt-4">
+		<div class="d-flex justify-content-between align-items-center mb-3">
+			<h1>Détails du stagiaire</h1>
+			<div class="d-flex gap-2">
+				<a href="{{ path('app_stagiaire_index') }}" class="btn btn-secondary">Retour</a>
+				<a href="{{ path('app_stagiaire_edit', {'id': stagiaire.id}) }}" class="btn btn-warning">Modifier</a>
+			</div>
+		</div>
+
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<th>Nom</th>
+					<td>{{ stagiaire.lastname }}</td>
+				</tr>
+				<tr>
+					<th>Prénom</th>
+					<td>{{ stagiaire.firstname }}</td>
+				</tr>
+				<tr>
+					<th>Téléphone</th>
+					<td>{{ stagiaire.phoneNumber }}</td>
+				</tr>
+				<tr>
+					<th>Email</th>
+					<td>{{ stagiaire.email }}</td>
+				</tr>
+				<tr>
+					<th>Cycle</th>
+					<td>{{ stagiaire.cycle ? stagiaire.cycle.name : 'Non défini' }}</td>
+				</tr>
+				<tr>
+					<th>Matière de stage</th>
+					<td>{{ stagiaire.matiereDeStage ? stagiaire.matiereDeStage.nom : 'Non définie' }}</td>
+				</tr>
+				<tr>
+					<th>Encadrant</th>
+					<td>{{ stagiaire.encadrant ? stagiaire.encadrant.fullName : 'Non défini' }}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+{% endblock %}

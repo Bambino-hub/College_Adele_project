@@ -22,6 +22,10 @@ class SurveillanceManager
         Teatchers $newTeacher
     ): void {
 
+        if (!$newTeacher->isCanSupervise()) {
+            throw new \Exception("Ce personnel n'est pas autorisé pour la surveillance.");
+        }
+
         $exam = $surveillance->getExamen();
 
         // ======================================================
@@ -42,7 +46,7 @@ class SurveillanceManager
         // ======================================================
         foreach ($exam->getSurveillances() as $existing) {
             if (
-                $existing->getEnseignant()->getId() === $newTeacher->getId()
+                $existing->getEnseignant()?->getId() === $newTeacher->getId()
                 &&
                 $existing->getId() !== $surveillance->getId()
             ) {

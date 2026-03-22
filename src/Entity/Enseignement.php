@@ -15,7 +15,7 @@ class Enseignement
     #[Groups(['Enseignement:read'])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'className')]
+    #[ORM\ManyToOne(inversedBy: 'enseignements')]
     #[Groups(['Enseignement:read'])]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Teatchers $teacher = null;

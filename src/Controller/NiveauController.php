@@ -42,7 +42,7 @@ final class NiveauController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_niveau_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_niveau_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Niveau $niveau): Response
     {
         return $this->render('niveau/show.html.twig', [
@@ -50,7 +50,7 @@ final class NiveauController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_niveau_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_niveau_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, Niveau $niveau, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(NiveauType::class, $niveau);
@@ -68,10 +68,10 @@ final class NiveauController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_niveau_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_niveau_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Niveau $niveau, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$niveau->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $niveau->getId(), $request->getPayload()->getString('_token'))) {
             $entityManager->remove($niveau);
             $entityManager->flush();
         }

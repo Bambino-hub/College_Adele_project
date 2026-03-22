@@ -42,7 +42,7 @@ final class MatterController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_matter_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_matter_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Matter $matter): Response
     {
         return $this->render('matter/show.html.twig', [
@@ -50,7 +50,7 @@ final class MatterController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_matter_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_matter_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, Matter $matter, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(MatterType::class, $matter);
@@ -68,7 +68,7 @@ final class MatterController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_matter_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_matter_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Matter $matter, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $matter->getId(), $request->getPayload()->getString('_token'))) {

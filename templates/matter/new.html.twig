@@ -5,7 +5,5 @@
 {% block body %}
     <h1>Create new Matter</h1>
 
-    {{ include('matter/_form.html.twig') }}
-
-    <a href="{{ path('app_matter_index') }}">back to list</a>
+    {{ include('matter/_form.html.twig', {'finish_path': path('app_matter_index')}) }}
 {% endblock %}

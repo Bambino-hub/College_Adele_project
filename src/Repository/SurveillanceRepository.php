@@ -46,17 +46,27 @@ class SurveillanceRepository extends ServiceEntityRepository
      * la classe, selon la date croissante 
      * 
      */
-    public function findSurveillanceTableau()
+    public function findSurveillanceTableau(?int $cycleId = null): array
     {
-        return $this->createQueryBuilder('s')
+        $qb = $this->createQueryBuilder('s')
             ->join('s.examen', 'e')
-            ->join('e.classe', 'c')
+            ->join('s.classe', 'c')
             ->join('c.niveau', 'n')
-            ->join('s.enseignant', 'ens')
-            ->addSelect('e', 'c', 'n', 'ens')
+            ->join('n.cycle', 'cycle')
+            ->leftJoin('s.enseignant', 'ens')
+            ->leftJoin('s.stagiaire', 'stagiaire')
+            ->addSelect('e', 'c', 'n', 'cycle', 'ens', 'stagiaire')
             ->orderBy('e.date', 'ASC')
+            ->addOrderBy('e.heursDebut', 'ASC')
+            ->addOrderBy('e.heureFin', 'ASC')
             ->addOrderBy('n.name', 'ASC')
-            ->getQuery()
-            ->getResult();
+            ->addOrderBy('c.name', 'ASC');
+
+        if ($cycleId !== null) {
+            $qb->andWhere('cycle.id = :cycleId')
+                ->setParameter('cycleId', $cycleId);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 }

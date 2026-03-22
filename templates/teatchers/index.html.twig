@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des enseignants du Collège Adèle
+{% block title %}LE PERSONNEL 2025-2026
 {% endblock %}
 
 {% block importmap %}
@@ -15,7 +15,10 @@
 {% block body %}
 
 	<div class="teachers-page teachers-index">
-		<h1 class="teachers-title text-center	">Liste des enseignants du Collège Adèle</h1>
+		<div class="text-center mb-3">
+			<h1 class="teachers-title mb-1">LE PERSONNEL 2025-2026</h1>
+			<p class="mb-0"><strong>ETABLISSEMENT :</strong> COLLEGE ADELE</p>
+		</div>
 
 		{# barre d'outils située au dessus du tableau #}
 		<div class="teachers-toolbar row mb-3">
@@ -26,7 +29,7 @@
 
 				<a href="#" class="btn btn-secondary">Enseignants du lycée</a>
 
-				<a href="#" class="btn btn-secondary">Stagiaires</a>
+				<a href="{{ path('app_stagiaire_index') }}" class="btn btn-secondary">Stagiaires</a>
 			</div>
 
 			{# Frame turbo pour charger la page d'ajout #}
@@ -43,22 +46,28 @@
 			<table class="table table-success table-striped teachers-table">
 				<thead>
 					<tr>
-						<th>Id</th>
-						<th>Nom</th>
-						<th>Prénom</th>
-						<th>Téléphone</th>
-						<th>Email</th>
+						<th>N°</th>
+						<th>NOM &amp; PRENOMS</th>
+						<th>SEXE</th>
+						<th>MATRICULE</th>
+						<th>STATUT</th>
+						<th>DISCIPLINES</th>
+						<th>Cycle</th>
+						<th>CONTACT</th>
 						<th>actions</th>
 					</tr>
 				</thead>
 				<tbody id="teachers_table_body">
 					{% for teatcher in teatchers %}
 						<tr>
-							<td>{{ teatcher.id }}</td>
-							<td>{{ teatcher.lastname }}</td>
-							<td>{{ teatcher.firstname }}</td>
+							<td>{{ loop.index }}</td>
+							<td>{{ teatcher.fullName }}</td>
+							<td>{{ teatcher.sexe ?: '-' }}</td>
+							<td>{{ teatcher.matricule ?: '-' }}</td>
+							<td>{{ teatcher.statut ?: '-' }}</td>
+							<td>{{ teatcher.disciplines ?: '-' }}</td>
+							<td>{{ teatcher.pdfCycle ?: '-' }}</td>
 							<td>{{ teatcher.phoneNumber }}</td>
-							<td>{{ teatcher.email }}</td>
 							<td class="d-flex gap-3 teachers-action-cell">
 								<a href="{{ path('teatchers_show', {'id': teatcher.id}) }}" class="btn btn-info ">show</a>
 
@@ -70,7 +79,7 @@
 						</tr>
 					{% else %}
 						<tr>
-							<td colspan="6">no records found</td>
+							<td colspan="9">no records found</td>
 						</tr>
 					{% endfor %}
 				</tbody>

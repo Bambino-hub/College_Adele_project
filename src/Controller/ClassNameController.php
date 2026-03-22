@@ -33,7 +33,9 @@ final class ClassNameController extends AbstractController
             $entityManager->persist($className);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_class_name_index', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', 'La classe a été enregistrée.');
+
+            return $this->redirectToRoute('app_class_name_new', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('class_name/new.html.twig', [
@@ -42,7 +44,7 @@ final class ClassNameController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_class_name_show', methods: ['GET'])]
+    #[Route('/{id}', name: 'app_class_name_show', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(ClassName $className): Response
     {
         return $this->render('class_name/show.html.twig', [
@@ -50,7 +52,7 @@ final class ClassNameController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_class_name_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_class_name_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     public function edit(Request $request, ClassName $className, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(ClassNameType::class, $className);
@@ -68,7 +70,7 @@ final class ClassNameController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_class_name_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_class_name_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, ClassName $className, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $className->getId(), $request->getPayload()->getString('_token'))) {

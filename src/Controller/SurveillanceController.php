@@ -2,285 +2,343 @@
 
 namespace App\Controller;
 
-use App\Entity\Examen;
+use App\Entity\Cycles;
 use App\Repository\ExamenRepository;
 use App\Repository\SurveillanceRepository;
 use App\Service\SurveillanceGenerator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use Symfony\Component\Routing\Attribute\Route;
 use Dompdf\Dompdf;
 use Dompdf\Options;
-// use Box\Spout\Writer\XLSX\Writer as XLSXWriter;
-use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\IOFactory;
 
 class SurveillanceController extends AbstractController
 {
-
+    /**
+     * Initialise les dépôts nécessaires au tableau de surveillance.
+     */
     public function __construct(
         private readonly SurveillanceRepository $surveillanceRepository,
         private  readonly ExamenRepository $examenRepository
 
     ) {}
 
-    #[Route('/exam/generate-surveillance', name: 'exam_generate_surveillance', methods: ['GET'])]
-    public function generate(
-        // Examen $exam,
-        SurveillanceGenerator $generator
-    ): JsonResponse {
-
+    /**
+     * Génère les surveillances d'un cycle puis renvoie vers la page appelante.
+     */
+    #[Route('/exam/generate-surveillance/cycle/{id}', name: 'exam_generate_surveillance_for_cycle', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function generateForCycle(Request $request, Cycles $cycle, SurveillanceGenerator $generator): RedirectResponse
+    {
         try {
-            // Appel du service de génération
-            $generator->generate($this->examenRepository->findAll()); // ID de l'examen à générer (à adapter)
+            $generator->generate($this->examenRepository->findByCycle($cycle->getId()));
+            $this->addFlash('success', sprintf('Les surveillances du %s ont été générées.', $cycle->getName()));
+        } catch (\Throwable $exception) {
+            $this->addFlash('danger', $exception->getMessage());
+        }
 
-            return new JsonResponse([
-                'success' => true,
-                'message' => 'Tableau de surveillance généré avec succès.'
-            ]);
-        } catch (\Exception $e) {
+        $referer = $request->headers->get('referer');
 
-            return new JsonResponse([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 400);
+        if ($referer) {
+            return $this->redirect($referer);
+        }
+
+        return $this->redirectToRoute('app_examen_cycle_index', ['id' => $cycle->getId()]);
+    }
+
+    /**
+     * Construit le tableau des surveillances pour un cycle donné.
+     */
+    #[Route('/surveillance/tableau/cycle/{id}', name: 'surveillance_tableau_cycle', requirements: ['id' => '\d+'])]
+    public function showSurveillanceTableau(Request $request, Cycles $cycle): Response
+    {
+        $surveillances = $this->surveillanceRepository->findSurveillanceTableau($cycle->getId());
+        $headerConfig = $this->resolveHeaderConfig($request, $cycle);
+        $orderedLevels = $this->resolveOrderedLevels($cycle);
+
+        $groupedSurveillances = $this->buildGroupedSurveillances($surveillances, $orderedLevels);
+        $programRows = $this->buildProgramRows($groupedSurveillances, $orderedLevels);
+
+
+        return $this->render('surveillance/tableau.html.twig', [
+            'cycle' => $cycle,
+            'orderedLevels' => $orderedLevels,
+            'programRows' => $programRows,
+            'headerConfig' => $headerConfig,
+        ]);
+    }
+
+    /**
+     * @param array<int, \App\Entity\Surveillance> $surveillances
+     * @param string[] $orderedLevels
+     * @return array<string, array<string, array{label: string, levels: array<string, array<string, array{id: int|null, matiere: string, assignments: array<string, string[]>}>>}>>
+     */
+    private function buildGroupedSurveillances(array $surveillances, array $orderedLevels): array
+    {
+        $grouped = [];
+
+        foreach ($surveillances as $surveillance) {
+            $examen = $surveillance->getExamen();
+            $classe = $surveillance->getClasse();
+
+            if ($examen === null || $classe === null) {
+                continue;
+            }
+
+            $dateKey = $examen->getDate()?->format('Y-m-d') ?? 'Date inconnue';
+            $start = $examen->getHeursDebut()?->format('H:i') ?? '??:??';
+            $end = $examen->getHeureFin()?->format('H:i') ?? '??:??';
+            $slotKey = sprintf('%s-%s', $start, $end);
+
+            if (!isset($grouped[$dateKey][$slotKey])) {
+                $grouped[$dateKey][$slotKey] = [
+                    'label' => sprintf('%s - %s', $start, $end),
+                    'levels' => [],
+                ];
+            }
+
+            $levelName = $classe->getNiveau()?->getName() ?? 'Sans niveau';
+            $displayLevel = $this->resolveDisplayLevelName($levelName, $classe->getName());
+
+            if (!isset($grouped[$dateKey][$slotKey]['levels'][$displayLevel])) {
+                $grouped[$dateKey][$slotKey]['levels'][$displayLevel] = [];
+            }
+
+            $examId = $examen->getId() ?? 0;
+            $entryKey = (string) $examId;
+
+            if (!isset($grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey])) {
+                $grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey] = [
+                    'id' => $examen->getId(),
+                    'matiere' => $examen->getMatiere()?->getNom() ?? 'Matiere non definie',
+                    'assignments' => [],
+                ];
+            }
+
+            $classLabel = $this->resolveDisplayClassName($classe->getName() ?? 'Classe inconnue');
+
+            if (!isset($grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey]['assignments'][$classLabel])) {
+                $grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey]['assignments'][$classLabel] = [];
+            }
+
+            $fullName = trim($surveillance->getSurveillantFullName());
+            if ($fullName !== '') {
+                $grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey]['assignments'][$classLabel][$fullName] = $fullName;
+            }
+        }
+
+        ksort($grouped);
+
+        foreach ($grouped as &$slots) {
+            uksort($slots, static fn(string $left, string $right): int => strcmp($left, $right));
+
+            foreach ($slots as &$slotData) {
+                uksort($slotData['levels'], function (string $left, string $right) use ($orderedLevels): int {
+                    $leftPosition = array_search($left, $orderedLevels, true);
+                    $rightPosition = array_search($right, $orderedLevels, true);
+
+                    $leftPosition = $leftPosition === false ? PHP_INT_MAX : $leftPosition;
+                    $rightPosition = $rightPosition === false ? PHP_INT_MAX : $rightPosition;
+
+                    return $leftPosition <=> $rightPosition;
+                });
+
+                foreach ($slotData['levels'] as &$entriesByKey) {
+                    foreach ($entriesByKey as &$entry) {
+                        ksort($entry['assignments'], SORT_NATURAL | SORT_FLAG_CASE);
+
+                        foreach ($entry['assignments'] as &$surveillants) {
+                            $surveillants = array_values($surveillants);
+                            sort($surveillants, SORT_NATURAL | SORT_FLAG_CASE);
+                        }
+                        unset($surveillants);
+                    }
+                    unset($entry);
+                }
+                unset($entriesByKey);
+            }
+            unset($slotData);
+        }
+        unset($slots);
+
+        return $grouped;
+    }
+
+    private function resolveDisplayLevelName(string $levelName, ?string $className): string
+    {
+        $normalizedLevel = mb_strtolower(trim($levelName));
+        $normalizedClass = mb_strtolower(trim((string) $className));
+
+        if (
+            in_array($normalizedLevel, ['tle c', 'tle d', 'tle d2'], true)
+            || in_array($normalizedClass, ['tle c', 'tle d', 'tle d2'], true)
+        ) {
+            return 'Tle D et C';
+        }
+
+        return $levelName;
+    }
+
+    private function resolveDisplayClassName(string $className): string
+    {
+        $normalized = mb_strtolower(trim($className));
+
+        return match ($normalized) {
+            'tle d2', 'tle d' => 'Tle D2',
+            default => $className,
+        };
+    }
+
+    /**
+     * @param array<string, array<string, array{label: string, levels: array<string, array<string, array{id: int|null, matiere: string, assignments: array<string, string[]>}>>}>> $groupedSurveillances
+     * @param string[] $orderedLevels
+     * @return array<int, array{date: string, slot: string, cells: array<string, array<int, array{id: int|null, matiere: string, assignments: array<string, string[]>}>>}>
+     */
+    private function buildProgramRows(array $groupedSurveillances, array $orderedLevels): array
+    {
+        $rows = [];
+
+        foreach ($groupedSurveillances as $date => $slots) {
+            foreach ($slots as $slot) {
+                $cells = [];
+
+                foreach ($orderedLevels as $level) {
+                    $cells[$level] = [];
+
+                    if (!isset($slot['levels'][$level])) {
+                        continue;
+                    }
+
+                    foreach ($slot['levels'][$level] as $entry) {
+                        $cells[$level][] = $entry;
+                    }
+                }
+
+                $rows[] = [
+                    'date' => $date,
+                    'slot' => $slot['label'],
+                    'cells' => $cells,
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Retourne l'ordre de présentation des niveaux selon le cycle.
+     *
+     * @return string[]
+     */
+    private function resolveOrderedLevels(?Cycles $cycle): array
+    {
+        if ($cycle?->getName() === 'Cycle 2') {
+            return ['2nde CD', '2nde A', '1ere D', '1ere A', 'Tle A', 'Tle D et C'];
+        }
+
+        return ['6eme', '5eme', '4eme', '3eme'];
+    }
+
+    /**
+     * Exporte le tableau de surveillance du cycle demandé.
+     */
+    #[Route('/surveillance/tableau/export/{format}/cycle/{id}', name: 'surveillance_tableau_export_cycle', requirements: ['id' => '\d+'])]
+    public function exportTableau(Request $request, string $format, Cycles $cycle): Response
+    {
+        $surveillances = $this->surveillanceRepository->findSurveillanceTableau($cycle->getId());
+        $headerConfig = $this->resolveHeaderConfig($request, $cycle);
+
+        $orderedLevels = $this->resolveOrderedLevels($cycle);
+        $groupedSurveillances = $this->buildGroupedSurveillances($surveillances, $orderedLevels);
+        $programRows = $this->buildProgramRows($groupedSurveillances, $orderedLevels);
+
+        switch ($format) {
+            case 'pdf':
+                return $this->exportPdf($programRows, $orderedLevels, $cycle, $headerConfig);
+            default:
+                throw new \InvalidArgumentException('Format non supporté : ' . $format . '. Formats disponibles : pdf.');
         }
     }
 
     /**
-     * Affiche le tableau de surveillance pour un examen donné
+     * Génère le rendu PDF à partir du tableau préparé.
      */
-    #[Route('/exam/{id}/surveillance', name: 'exam_surveillance')]
-    public function show(Examen $exam)
-    {
-        $surveillances = $this->surveillanceRepository->findAll();
-
-        return $this->render('surveillance/show.html.twig', [
-            'exam' => $exam
-        ]);
-    }
-
-    #[Route('/surveillance', name: 'surveillance_index')]
-    public function index(): Response
-    {
-        $surveillances = $this->surveillanceRepository->findAll();
-
-        return $this->render('surveillance/index.html.twig', [
-            'surveillances' => $surveillances
-        ]);
-    }
-
-    #[Route('/surveillance/tableau', name: 'surveillance_tableau')]
-    public function showSurveillanceTableau(): Response
-    {
-        $surveillances = $this->surveillanceRepository->findSurveillanceTableau();
-
-        $tableau = [];
-
-        // ordre souhaité des niveaux pour affichage
-        $ordreNiveaux = ['6eme', '5eme', '4eme', '3eme'];
-
-        foreach ($surveillances as $s) {
-            $date = $s->getExamen()->getDate()->format('Y-m-d');
-
-            // Utiliser la classe spécifique de la surveillance
-            $niveau = $s->getClasse()->getNiveau()->getName();
-
-            if (!isset($tableau[$date][$niveau])) {
-                $tableau[$date][$niveau] = [
-                    'niveau' => $niveau,
-                    'matiere' => $s->getExamen()->getMatiere()->getNom(),
-                    // utilise un tableau associatif pour forcer l'unicité
-                    'surveillants' => [],
-                ];
-            }
-
-            // enregistrer par clé pour éviter toute répétition
-            $nom = $s->getEnseignant()->getLastname();
-            $tableau[$date][$niveau]['surveillants'][$nom] = $nom;
-        }
-
-        // convertir les tableaux associatifs en listes simples
-        foreach ($tableau as $d => &$niveaux) {
-            foreach ($niveaux as $niv => &$data) {
-                $data['surveillants'] = array_values($data['surveillants']);
-            }
-            unset($data);
-        }
-        unset($niveaux);
-
-        // trier les dates par ordre croissant
-        ksort($tableau);
-
-        // assurer l'ordre des niveaux à l'intérieur de chaque date
-        foreach ($tableau as &$niveaux) {
-            uksort($niveaux, function ($a, $b) use ($ordreNiveaux) {
-                $posA = array_search($a, $ordreNiveaux);
-                $posB = array_search($b, $ordreNiveaux);
-                return $posA <=> $posB;
-            });
-        }
-        unset($niveaux);
-
-
-        return $this->render('surveillance/tableau.html.twig', [
-            'tableau' => $tableau
-        ]);
-    }
-
-    #[Route('/surveillance/tableau/export/{format}', name: 'surveillance_tableau_export')]
-    public function exportTableau(string $format): Response
-    {
-        // Récupérer les données comme dans showSurveillanceTableau
-        $surveillances = $this->surveillanceRepository->findSurveillanceTableau();
-
-        $tableau = [];
-
-        $ordreNiveaux = ['6eme', '5eme', '4eme', '3eme'];
-
-        foreach ($surveillances as $s) {
-            $date = $s->getExamen()->getDate()->format('Y-m-d');
-
-            foreach ($s->getExamen()->getClasse() as $classe) {
-                $niveau = $classe->getNiveau()->getName();
-
-                if (!isset($tableau[$date][$niveau])) {
-                    $tableau[$date][$niveau] = [
-                        'niveau' => $niveau,
-                        'matiere' => $s->getExamen()->getMatiere()->getNom(),
-                        'surveillants' => [],
-                    ];
-                }
-
-                $nom = $s->getEnseignant()->getLastname();
-                $tableau[$date][$niveau]['surveillants'][$nom] = $nom;
-            }
-        }
-
-        foreach ($tableau as $d => &$niveaux) {
-            foreach ($niveaux as $niv => &$data) {
-                $data['surveillants'] = array_values($data['surveillants']);
-            }
-            unset($data);
-        }
-        unset($niveaux);
-
-        ksort($tableau);
-
-        foreach ($tableau as &$niveaux) {
-            uksort($niveaux, function ($a, $b) use ($ordreNiveaux) {
-                $posA = array_search($a, $ordreNiveaux);
-                $posB = array_search($b, $ordreNiveaux);
-                return $posA <=> $posB;
-            });
-        }
-        unset($niveaux);
-
-        switch ($format) {
-            case 'pdf':
-                return $this->exportPdf($tableau);
-                // case 'excel':
-                //     return $this->exportExcel($tableau);
-            case 'word':
-                return $this->exportWord($tableau);
-            default:
-                throw new \InvalidArgumentException('Format non supporté : ' . $format . '. Formats disponibles : pdf, word.');
-        }
-    }
-
-    private function exportPdf(array $tableau): Response
+    private function exportPdf(array $programRows, array $orderedLevels, Cycles $cycle, array $headerConfig): Response
     {
         $html = $this->renderView('surveillance/tableau_export.html.twig', [
-            'tableau' => $tableau
+            'programRows' => $programRows,
+            'cycle' => $cycle,
+            'orderedLevels' => $orderedLevels,
+            'headerConfig' => $headerConfig,
         ]);
 
         $options = new Options();
-        $options->set('defaultFont', 'Arial');
+        $options->set('defaultFont', 'Times-Roman');
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
 
+        $filename = sprintf('tableau_surveillance_%s.pdf', strtolower(str_replace(' ', '_', $cycle->getName() ?? 'cycle')));
+
         return new Response($dompdf->output(), 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="tableau_surveillance.pdf"'
+            'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
         ]);
     }
 
-    // private function exportExcel(array $tableau): Response
-    // {
-    //     try {
-    //         $writer = XLSXWriter::create();
-    //         $tempFile = tempnam(sys_get_temp_dir(), 'surveillance');
-    //         $writer->openToFile($tempFile);
-
-    //         // En-têtes
-    //         $header = ['Date', '6eme', '5eme', '4eme', '3eme'];
-    //         $writer->addRow($header);
-
-    //         foreach ($tableau as $date => $niveaux) {
-    //             $row = [(string) $date];
-    //             foreach (['6eme', '5eme', '4eme', '3eme'] as $niveau) {
-    //                 if (isset($niveaux[$niveau])) {
-    //                     $matiere = (string) $niveaux[$niveau]['matiere'];
-    //                     $surveillants = implode("\n", array_map('strval', $niveaux[$niveau]['surveillants']));
-    //                     $row[] = $matiere . "\n" . $surveillants;
-    //                 } else {
-    //                     $row[] = '';
-    //                 }
-    //             }
-    //             $writer->addRow($row);
-    //         }
-
-    //         $writer->close();
-
-    //         $response = $this->file($tempFile, 'tableau_surveillance.xlsx', ResponseHeaderBag::DISPOSITION_ATTACHMENT);
-    //         unlink($tempFile);
-    //         return $response;
-    //     } catch (\Exception $e) {
-    //         throw new \RuntimeException('Erreur lors de l\'export Excel : ' . $e->getMessage());
-    //     }
-    // }
-
-    private function exportWord(array $tableau): Response
+    /**
+     * Construit l'entete personnalisee a partir des parametres de filtre.
+     *
+     * @return array{title: string, cycleLine: string, trimestre: string, periode: string, anneeScolaire: string, customHeader: string}
+     */
+    private function resolveHeaderConfig(Request $request, Cycles $cycle): array
     {
-        $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
-
-        $section->addTitle('Tableau de Surveillance', 1);
-
-        $table = $section->addTable();
-        $table->addRow();
-        $table->addCell(2000)->addText('Date');
-        $table->addCell(2000)->addText('6eme');
-        $table->addCell(2000)->addText('5eme');
-        $table->addCell(2000)->addText('4eme');
-        $table->addCell(2000)->addText('3eme');
-
-        foreach ($tableau as $date => $niveaux) {
-            $table->addRow();
-            $table->addCell()->addText($date);
-            foreach (['6eme', '5eme', '4eme', '3eme'] as $niveau) {
-                $cell = $table->addCell();
-                if (isset($niveaux[$niveau])) {
-                    $cell->addText($niveaux[$niveau]['matiere'], ['bold' => true]);
-                    $cell->addTextBreak();
-                    foreach ($niveaux[$niveau]['surveillants'] as $surveillant) {
-                        $cell->addText($surveillant);
-                        $cell->addTextBreak();
-                    }
-                }
-            }
+        $trimestre = (string) $request->query->get('trimestre', '2');
+        if (!in_array($trimestre, ['1', '2'], true)) {
+            $trimestre = '2';
         }
 
-        $tempFile = tempnam(sys_get_temp_dir(), 'surveillance_word');
-        $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-        $objWriter->save($tempFile);
+        $periode = (string) $request->query->get('periode', 'premiere');
+        if (!in_array($periode, ['premiere', 'deuxieme'], true)) {
+            $periode = 'premiere';
+        }
 
-        $response = $this->file($tempFile, 'tableau_surveillance.docx', ResponseHeaderBag::DISPOSITION_ATTACHMENT);
-        unlink($tempFile);
-        return $response;
+        $anneeScolaire = trim((string) $request->query->get('annee_scolaire', $this->defaultSchoolYear()));
+        if ($anneeScolaire === '') {
+            $anneeScolaire = $this->defaultSchoolYear();
+        }
+
+        $customHeader = trim((string) $request->query->get('entete', ''));
+
+        $periodeLabel = $periode === 'deuxieme' ? 'DEUXIEME PERIODE DE COURS' : 'PREMIERE PERIODE DE COURS';
+        $trimestreLabel = $trimestre === '1' ? 'PREMIER' : 'DEUXIEME';
+
+        $defaultTitle = sprintf(
+            'PROGRAMME DES SURVEILLANCES DE LA %s DU %s TRIMESTRE %s',
+            $periodeLabel,
+            $trimestreLabel,
+            $anneeScolaire
+        );
+
+        $title = $customHeader !== '' ? strtoupper($customHeader) : $defaultTitle;
+
+        return [
+            'title' => $title,
+            'cycleLine' => sprintf('CYCLE : %s', strtoupper((string) $cycle->getName())),
+            'trimestre' => $trimestre,
+            'periode' => $periode,
+            'anneeScolaire' => $anneeScolaire,
+            'customHeader' => $customHeader,
+        ];
+    }
+
+    private function defaultSchoolYear(): string
+    {
+        $currentYear = (int) date('Y');
+        $nextYear = $currentYear + 1;
+
+        return sprintf('%d-%d', $currentYear, $nextYear);
     }
 }

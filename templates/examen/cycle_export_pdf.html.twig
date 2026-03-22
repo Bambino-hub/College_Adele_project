@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<title>{{ headerConfig.title }}</title>
+		<style>
+			body {
+				font-family: "Times New Roman", Times, serif;
+				font-size: 11px;
+				color: #111;
+			}
+			h2 {
+				font-size: 15px;
+				margin: 0;
+				text-align: center;
+				text-transform: uppercase;
+				letter-spacing: 0.2px;
+			}
+			.cycle-line {
+				text-align: center;
+				font-size: 11px;
+				margin: 6px 0 14px;
+				color: #333;
+			}
+			.program-wrapper {
+				border: 1px solid #222;
+				padding: 8px;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+			th,
+			td {
+				border: 1px solid #222;
+				padding: 6px;
+				vertical-align: top;
+			}
+			th {
+				background: #f1f1f1;
+				text-align: center;
+				text-transform: uppercase;
+				font-size: 10px;
+				font-weight: 700;
+			}
+			.day-cell {
+				font-weight: bold;
+				text-transform: uppercase;
+				font-size: 11px;
+				width: 165px;
+			}
+			.slot-cell {
+				font-weight: 600;
+				font-size: 11px;
+				width: 105px;
+				white-space: nowrap;
+			}
+			.entry-line {
+				margin-bottom: 3px;
+				border: 1px solid #d9d9d9;
+				padding: 4px 5px;
+				font-size: 11px;
+			}
+			.entry-line:last-child {
+				margin-bottom: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="program-wrapper">
+			<h2>{{ headerConfig.title }}</h2>
+			<div class="cycle-line">{{ headerConfig.cycleLine }}</div>
+
+			{% if programRows is empty %}
+				<p>Aucun examen trouvé pour ce cycle.</p>
+			{% else %}
+				<table>
+					<thead>
+						<tr>
+							<th>Jours</th>
+							<th>Heures</th>
+							{% for level in orderedLevels %}
+								<th>{{ level }}</th>
+							{% endfor %}
+						</tr>
+					</thead>
+					<tbody>
+						{% set dayMap = {
+							1: 'LUNDI',
+							2: 'MARDI',
+							3: 'MERCREDI',
+							4: 'JEUDI',
+							5: 'VENDREDI',
+							6: 'SAMEDI',
+							7: 'DIMANCHE'
+						} %}
+						{% for row in programRows %}
+							<tr>
+								<td class="day-cell">{{ dayMap[row.date|date('N')] ?? '' }} {{ row.date|date('d/m/Y') }}</td>
+								<td class="slot-cell">{{ row.slot }}</td>
+								{% for level in orderedLevels %}
+									<td>
+										{% if row.cells[level] is not empty %}
+											{% for entry in row.cells[level] %}
+												<div class="entry-line">{{ entry.label }}</div>
+											{% endfor %}
+										{% else %}
+											-
+										{% endif %}
+									</td>
+								{% endfor %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			{% endif %}
+		</div>
+	</body>
+</html>

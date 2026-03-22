@@ -18,7 +18,7 @@ class EnseignementType extends AbstractType
         $builder
             ->add('teacher', EntityType::class, [
                 'class' => Teatchers::class,
-                'choice_label' => 'lastname',
+                'choice_label' => static fn(Teatchers $teacher): string => $teacher->getFullName(),
             ])
             ->add('className', EntityType::class, [
                 'class' => ClassName::class,

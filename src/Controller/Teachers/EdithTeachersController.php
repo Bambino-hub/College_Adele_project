@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/teatchers')]
 final class EdithTeachersController extends AbstractController
 {
-    #[Route('/{id}/edit', name: 'teatchers_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'teatchers_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
     /**
      * cette fonction permet de modifier un enseignant
      * @return Response|\Symfony\Component\HttpFoundation\RedirectResponse

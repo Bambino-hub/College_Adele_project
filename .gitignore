@@ -18,3 +18,11 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+
+# Local virtualenvs used for OCR/transcription tooling
+/.transcribe-venv/
+/.venv_ocr/
+
+# Generated transcription artifacts
+/assets/docs/transcriptions/
+/assets/docs/*.m4a

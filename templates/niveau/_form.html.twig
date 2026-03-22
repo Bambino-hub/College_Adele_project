@@ -1,4 +1,9 @@
 {{ form_start(form) }}
     {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+        {% if finish_path is defined %}
+            <a href="{{ finish_path }}" class="btn btn-success">Terminer</a>
+        {% endif %}
+    </div>
 {{ form_end(form) }}

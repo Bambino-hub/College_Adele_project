@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ExamenRepository::class)]
 class Examen
@@ -176,5 +178,45 @@ class Examen
         $this->nombreSurveillantsParClasse = $nombreSurveillantsParClasse;
 
         return $this;
+    }
+
+    public function getCycle(): ?Cycles
+    {
+        foreach ($this->classe as $classe) {
+            $cycle = $classe->getNiveau()?->getCycle();
+
+            if ($cycle !== null) {
+                return $cycle;
+            }
+        }
+
+        return null;
+    }
+
+    #[Assert\Callback]
+    public function validateSingleCycle(ExecutionContextInterface $context): void
+    {
+        $cycleId = null;
+
+        foreach ($this->classe as $classe) {
+            $currentCycle = $classe->getNiveau()?->getCycle();
+
+            if ($currentCycle === null) {
+                continue;
+            }
+
+            if ($cycleId === null) {
+                $cycleId = $currentCycle->getId();
+                continue;
+            }
+
+            if ($cycleId !== $currentCycle->getId()) {
+                $context->buildViolation("Un examen ne peut contenir que des classes d'un seul cycle.")
+                    ->atPath('classe')
+                    ->addViolation();
+
+                return;
+            }
+        }
     }
 }

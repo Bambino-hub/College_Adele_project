@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class DeleteTeacherController extends AbstractController
 {
-    #[Route('/{id}', name: 'teatchers_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'teatchers_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Request $request, Teatchers $teatcher, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete' . $teatcher->getId(), $request->getPayload()->getString('_token'))) {

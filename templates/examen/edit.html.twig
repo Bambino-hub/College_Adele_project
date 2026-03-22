@@ -1,13 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Examen{% endblock %}
+{% block title %}Edit Examen
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Examen</h1>
+	<h1>Edit Examen</h1>
 
-    {{ include('examen/_form.html.twig', {'button_label': 'Update'}) }}
+	{{ include('examen/_form.html.twig', {'button_label': 'Update'}) }}
 
-    <a href="{{ path('app_examen_index') }}">back to list</a>
+	{% if cycleId is defined and cycleId %}
+		<a href="{{ path('app_examen_cycle_index', {'id': cycleId}) }}">back to cycle exams</a>
+	{% else %}
+		<a href="{{ path('app_examen_index') }}">back to list</a>
+	{% endif %}
 
-    {{ include('examen/_delete_form.html.twig') }}
+	{{ include('examen/_delete_form.html.twig', {'cycleId': cycleId|default(0)}) }}
 {% endblock %}

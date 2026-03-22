@@ -1,4 +1,86 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+    {{ form_row(form.date) }}
+    {{ form_row(form.heursDebut) }}
+    {{ form_row(form.heureFin) }}
+    {{ form_row(form.nombreSurveillantsParClasse) }}
+    {{ form_row(form.matiere) }}
+
+    <div class="form-check mb-2">
+        <input class="form-check-input" type="checkbox" id="toggle-all-classes">
+        <label class="form-check-label" for="toggle-all-classes">Toutes les classes</label>
+    </div>
+    {{ form_row(form.classe) }}
+
+    <div class="d-flex gap-2 mt-3">
+        <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+        {% if finish_path is defined %}
+            <a href="{{ finish_path }}" class="btn btn-success">Terminer</a>
+        {% endif %}
+    </div>
 {{ form_end(form) }}
+
+<script>
+    (function () {
+        const toggleId = 'toggle-all-classes';
+        const classContainerId = '{{ form.classe.vars.id }}';
+
+        const getElements = function () {
+            const toggleAll = document.getElementById(toggleId);
+            const classContainer = document.getElementById(classContainerId);
+
+            if (!toggleAll || !classContainer) {
+                return null;
+            }
+
+            return {
+                toggleAll: toggleAll,
+                classContainer: classContainer,
+                classCheckboxes: classContainer.querySelectorAll('input[type="checkbox"]')
+            };
+        };
+
+        const syncToggleAll = function () {
+            const elements = getElements();
+            if (!elements) {
+                return;
+            }
+
+            const total = elements.classCheckboxes.length;
+            const checked = Array.from(elements.classCheckboxes).filter(function (cb) {
+                return cb.checked;
+            }).length;
+
+            elements.toggleAll.checked = total > 0 && checked === total;
+            elements.toggleAll.indeterminate = checked > 0 && checked < total;
+        };
+
+        if (!window.__examToggleClassesBound) {
+            document.addEventListener('change', function (event) {
+                const elements = getElements();
+                if (!elements) {
+                    return;
+                }
+
+                if (event.target && event.target.id === toggleId) {
+                    elements.classCheckboxes.forEach(function (cb) {
+                        cb.checked = elements.toggleAll.checked;
+                    });
+                    syncToggleAll();
+                    return;
+                }
+
+                if (event.target && elements.classContainer.contains(event.target)) {
+                    syncToggleAll();
+                }
+            });
+
+            window.__examToggleClassesBound = true;
+        }
+
+        document.addEventListener('DOMContentLoaded', syncToggleAll);
+        document.addEventListener('turbo:load', syncToggleAll);
+        window.addEventListener('pageshow', syncToggleAll);
+
+        syncToggleAll();
+    })();
+</script>

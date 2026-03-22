@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Cycles{% endblock %}
+
+{% block body %}
+    <h1>Create new Cycles</h1>
+
+    {{ include('cycles/_form.html.twig', {'finish_path': path('app_cycles_index')}) }}
+{% endblock %}

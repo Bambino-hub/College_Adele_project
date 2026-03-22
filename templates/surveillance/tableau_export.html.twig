@@ -1,28 +1,181 @@
-<table border="1" style="width: 100%; border-collapse: collapse;">
-	<thead>
-		<tr style="background-color: #343a40; color: white;">
-			<th style="padding: 8px;">Date</th>
-			<th style="padding: 8px;">6eme</th>
-			<th style="padding: 8px;">5eme</th>
-			<th style="padding: 8px;">4eme</th>
-			<th style="padding: 8px;">3eme</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for date, niveaux in tableau %}
-			<tr>
-				<td style="padding: 8px;">{{ date|date('d/m/Y') }}</td>
-				{% for niveau in ['6eme','5eme','4eme','3eme'] %}
-					<td style="padding: 8px;">
-						{% if niveaux[niveau] is defined %}
-							<strong>{{ niveaux[niveau].matiere }}</strong><br>
-							{% for s in niveaux[niveau].surveillants %}
-								{{ s }}<br>
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<meta charset="UTF-8">
+		<title>{{ headerConfig.title }}</title>
+		<style>
+			@page {
+				size: A4 landscape;
+				margin: 9mm;
+			}
+
+			body {
+				margin: 0;
+				font-family: "Times New Roman", Times, serif;
+				color: #111;
+			}
+
+			.sheet {
+				width: 100%;
+				margin: 0 auto;
+			}
+
+			.page-break {
+				page-break-after: always;
+			}
+
+			h2 {
+				margin: 0 0 4px;
+				text-align: center;
+				font-size: 14px;
+				text-transform: uppercase;
+			}
+
+			.cycle-line {
+				text-align: center;
+				font-size: 11px;
+				margin: 0 0 10px;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				table-layout: fixed;
+			}
+
+			th,
+			td {
+				border: 1px solid #222;
+				padding: 4px;
+				vertical-align: top;
+				font-size: 10px;
+			}
+
+			th {
+				text-align: center;
+				font-size: 9px;
+				font-weight: 700;
+				text-transform: uppercase;
+				background: #efefef;
+			}
+
+			.day-col {
+				width: 110px;
+				font-weight: 700;
+			}
+
+			.slot-col {
+				width: 74px;
+				font-weight: 700;
+				white-space: nowrap;
+			}
+
+			.entry {
+				margin-bottom: 3px;
+				border: 1px solid #d7d7d7;
+				padding: 3px;
+			}
+
+			.entry:last-child {
+				margin-bottom: 0;
+			}
+
+			.assignment {
+				line-height: 1.25;
+			}
+
+			.class-name {
+				font-weight: 700;
+			}
+
+			tr {
+				page-break-inside: avoid;
+			}
+
+			.lycee th,
+			.lycee td {
+				font-size: 9px;
+				padding: 3px;
+			}
+
+			.lycee .day-col {
+				width: 96px;
+			}
+
+			.lycee .slot-col {
+				width: 68px;
+			}
+
+			.lycee .entry {
+				padding: 2px;
+				margin-bottom: 2px;
+			}
+		</style>
+	</head>
+	<body>
+		{% set isLycee = cycle.name == 'Cycle 2' %}
+
+		{% set dayMap = {
+			1: 'LUNDI',
+			2: 'MARDI',
+			3: 'MERCREDI',
+			4: 'JEUDI',
+			5: 'VENDREDI',
+			6: 'SAMEDI',
+			7: 'DIMANCHE'
+		} %}
+
+		<div class="sheet {{ isLycee ? 'lycee' : '' }}">
+			<h2>{{ headerConfig.title }}</h2>
+			<div class="cycle-line">{{ headerConfig.cycleLine }}</div>
+
+			<table>
+				<thead>
+					<tr>
+						<th class="day-col">Jours</th>
+						<th class="slot-col">Heures</th>
+						{% for niveau in orderedLevels %}
+							<th>{{ niveau }}</th>
+						{% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for row in programRows %}
+						<tr>
+							<td class="day-col">{{ dayMap[row.date|date('N')] ?? '' }}
+								{{ row.date|date('d/m/Y') }}</td>
+							<td class="slot-col">{{ row.slot }}</td>
+							{% for niveau in orderedLevels %}
+								<td>
+									{% if row.cells[niveau] is not empty %}
+										{% for entry in row.cells[niveau] %}
+											<div class="entry">
+												<strong>{{ entry.matiere }}</strong><br>
+												{% if entry.assignments is not empty %}
+													{% for className, surveillants in entry.assignments %}
+														<div class="assignment">
+															<span class="class-name">{{ className }}:</span>
+															{{ surveillants|join(', ') }}
+														</div>
+													{% endfor %}
+												{% else %}
+													<span>Aucun surveillant</span>
+												{% endif %}
+											</div>
+										{% endfor %}
+									{% else %}
+										-
+									{% endif %}
+								</td>
 							{% endfor %}
-						{% endif %}
-					</td>
-				{% endfor %}
-			</tr>
-		{% endfor %}
-	</tbody>
-</table>
+						</tr>
+					{% else %}
+						<tr>
+							<td colspan="{{ orderedLevels|length + 2 }}">Aucune surveillance générée.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</body>
+</html>

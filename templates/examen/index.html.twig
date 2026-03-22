@@ -5,19 +5,25 @@
 
 {% block body %}
 	<h1>Examen index</h1>
-	<div class="d-flex gap-2 mb-3">
-		<a href="{{path("exam_generate_surveillance")}}" class="btn btn-primary">Générer les surveillants</a>
-		<a href="{{path("surveillance_index")}}" class="btn btn-secondary">Voir les surveillants</a>
-		<a href="{{path("surveillance_tableau")}}" class="btn btn-info">Voir le tableau de surveillance</a>
-
+	<div class="d-flex flex-wrap gap-2 mb-3">
+		{% for cycle in cycles %}
+			<a href="{{ path('app_examen_new_for_cycle', {'id': cycle.id}) }}" class="btn btn-primary">Créer un examen du
+				{{ cycle.name }}</a>
+			<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Générer les surveillances du
+				{{ cycle.name }}</a>
+			<a href="{{ path('surveillance_tableau_cycle', {'id': cycle.id}) }}" class="btn btn-outline-info">Tableau
+				{{ cycle.name }}</a>
+		{% endfor %}
 	</div>
 	<table class="table">
 		<thead>
 			<tr>
 				<th>Id</th>
+				<th>Cycle</th>
 				<th>Date</th>
 				<th>HeursDebut</th>
 				<th>HeureFin</th>
+				<th>Matière</th>
 				<th>classe</th>
 				<th>actions</th>
 			</tr>
@@ -26,12 +32,16 @@
 			{% for examan in examens %}
 				<tr>
 					<td>{{ examan.id }}</td>
+					<td>{{ examan.cycle ? examan.cycle.name : 'Non défini' }}</td>
 					<td>{{ examan.date ? examan.date|date('Y-m-d') : '' }}</td>
 					<td>{{ examan.heursDebut ? examan.heursDebut|date('H:i:s') : '' }}</td>
 					<td>{{ examan.heureFin ? examan.heureFin|date('H:i:s') : '' }}</td>
-					{% for item in examan.classe %}
-						<td>{{ item.name }}</td>
-					{% endfor %}
+					<td>{{ examan.matiere ? examan.matiere.nom : '' }}</td>
+					<td>
+						{% for item in examan.classe %}
+							<div>{{ item.name }}</div>
+						{% endfor %}
+					</td>
 					<td>
 						<a href="{{ path('app_examen_show', {'id': examan.id}) }}">show</a>
 						<a href="{{ path('app_examen_edit', {'id': examan.id}) }}">edit</a>
@@ -39,7 +49,7 @@
 				</tr>
 			{% else %}
 				<tr>
-					<td colspan="5">no records found</td>
+					<td colspan="8">no records found</td>
 				</tr>
 			{% endfor %}
 		</tbody>

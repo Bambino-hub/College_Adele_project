@@ -1,0 +1,257 @@
+matieres:
+  - ECM
+  - HG/FR
+  - HG
+  - FR
+  - ANG
+  - MATHS
+  - SVT
+  - PC
+  - PCT
+  - EPS
+  - AGRI
+  - INFO
+  - EM
+  - MUSIQUE
+  - PHILO
+  - BIBLIO
+  - FOYER
+  - AUMONERIE
+  - FHR
+  - TM
+  - OPS
+
+personnels:
+  - full_name: "Sr.M . Joelle LOKOU"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1"
+    phone: "71832420"
+    disciplines: ["FHR", "TM", "FOYER"]
+  - full_name: "KIDIYO Tchadabalo"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1"
+    phone: "91817310"
+    disciplines: ["PC", "SVT"]
+  - full_name: "ABOA T. Maweki"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1"
+    phone: "90843450"
+    disciplines: ["AGRI", "ANG"]
+  - full_name: "TENASSE S. Aniyeba"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1"
+    phone: "92905952"
+    disciplines: ["HG/FR", "ECM"]
+  - full_name: "KOMOU Padabadi"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "90012347"
+    disciplines: ["HG"]
+  - full_name: "YAO"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1"
+    phone: "70254704"
+    disciplines: ["ANG"]
+  - full_name: "NAMPAGOU Yendouban"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "2"
+    phone: "91872447"
+    disciplines: ["FR"]
+  - full_name: "HUSRU Essi-sylvie"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "2"
+    phone: "93976007"
+    disciplines: ["FR"]
+  - full_name: "AWADE Essowe"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "90455316"
+    disciplines: ["SVT"]
+  - full_name: "ATEYO Abire"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "90732207"
+    disciplines: ["EPS"]
+  - full_name: "AGBA Kyzzi"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "93407643"
+    disciplines: ["SVT"]
+  - full_name: "SIGOE Essobadou"
+    statut: "Enseignant/Surveillant"
+    can_supervise: true
+    cycle: "2"
+    phone: "93169421"
+    disciplines: ["ANG", "ECM"]
+  - full_name: "DERMANE Ikpindi"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1"
+    phone: "92579759"
+    disciplines: ["FR", "ECM"]
+  - full_name: "PATA Hodabalo"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "92284930"
+    disciplines: ["FR"]
+  - full_name: "KAGA Maoumba"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "91360788"
+    disciplines: ["FR", "HG", "ECM"]
+  - full_name: "ABBY Mazamesso"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "90957750"
+    disciplines: ["FR"]
+  - full_name: "AGOSSA Kable"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "92103206"
+    disciplines: ["HG"]
+  - full_name: "MEDJETOU Massou-Aware"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "92108116"
+    disciplines: ["PHILO"]
+  - full_name: "ATTENTIRAH Nassou"
+    statut: "Enseignant Surveillant"
+    can_supervise: true
+    cycle: "1"
+    phone: "92105135"
+    disciplines: ["HG"]
+  - full_name: "ANAKA Anaharime"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "92369562"
+    disciplines: ["INFO"]
+  - full_name: "FALABIA Alongim"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "90705729"
+    disciplines: ["EM"]
+  - full_name: "ALAOUI T. Kadegna"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "91963760"
+    disciplines: ["ANG"]
+  - full_name: "AMOUSSOU Edo Yadou"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "70255291"
+    disciplines: ["EPS"]
+  - full_name: "WATOU Amesiki"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "91318727"
+    disciplines: ["AGRI", "SVT"]
+  - full_name: "LEMOU Essozolim"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "92695162"
+    disciplines: ["PC"]
+  - full_name: "ALI-DJOBONasser"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1"
+    phone: "70255291"
+  - full_name: "MASSAMPOU"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "91654086"
+    disciplines: ["MATHS"]
+  - full_name: "NADJOMBE Manine"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1"
+    phone: "91654007"
+    disciplines: ["AGRI", "SVT"]
+  - full_name: "KOULINTE Edah"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1"
+    phone: "92564312"
+    disciplines: ["MATHS"]
+  - full_name: "KPASSILI Mawoule Richard"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "93044066"
+    disciplines: ["PHILO"]
+  - full_name: "PAWILISSIM Pawoumondom"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "91791983"
+    disciplines: ["ECM", "FR"]
+  - full_name: "ALFA Essohouna"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "92876732"
+    disciplines: ["MUSIQUE"]
+  - full_name: "EDJEOU Mondjonesso"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "98484885"
+    disciplines: ["MATHS"]
+  - full_name: "N'WENA PYABALO"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1"
+    phone: "92919170"
+    disciplines: ["MATHS"]
+  - full_name: "TAPE DALLE Gbati"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "2"
+    phone: "92194078"
+    disciplines: ["PC"]
+  - full_name: "KILI"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1"
+    phone: "92780036"
+    disciplines: ["PCT"]
+  - full_name: "GNAMPI Mohamed"
+    statut: "Enseignant/Surveillant"
+    can_supervise: true
+    cycle: "1"
+    phone: "91296253"
+    disciplines: ["ANG", "ECM"]
+  - full_name: "BADJAKE Abide"
+    statut: "Enseignante"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "90514162"
+    disciplines: ["ANG", "BIBLIO"]
+  - full_name: "TIGANKPA Gnogno"
+    statut: "Enseignant"
+    can_supervise: true
+    cycle: "1/2"
+    phone: "90422765"
+    disciplines: ["MATHS", "PC"]

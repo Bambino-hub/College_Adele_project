@@ -24,6 +24,9 @@ class Niveau
     #[ORM\OneToMany(targetEntity: ClassName::class, mappedBy: 'niveau')]
     private Collection $classNames;
 
+    #[ORM\ManyToOne(inversedBy: 'niveaux')]
+    private ?Cycles $cycle = null;
+
     public function __construct()
     {
         $this->classNames = new ArrayCollection();
@@ -72,6 +75,18 @@ class Niveau
                 $className->setNiveau(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCycle(): ?Cycles
+    {
+        return $this->cycle;
+    }
+
+    public function setCycle(?Cycles $cycle): static
+    {
+        $this->cycle = $cycle;
 
         return $this;
     }

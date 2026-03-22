@@ -40,4 +40,19 @@ class ExamenRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findByCycle(int $cycleId): array
+    {
+        return $this->createQueryBuilder('e')
+            ->join('e.classe', 'c')
+            ->join('c.niveau', 'n')
+            ->join('n.cycle', 'cycle')
+            ->addSelect('c', 'n', 'cycle')
+            ->andWhere('cycle.id = :cycleId')
+            ->setParameter('cycleId', $cycleId)
+            ->orderBy('e.date', 'ASC')
+            ->addOrderBy('e.heursDebut', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }

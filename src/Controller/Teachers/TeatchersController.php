@@ -21,7 +21,7 @@ final class TeatchersController extends AbstractController
     public function index(): Response
     {
         return $this->render('teatchers/index.html.twig', [
-            'teatchers' => $this->teatchersRepository->findAll(),
+            'teatchers' => $this->teatchersRepository->findBy([], ['lastname' => 'ASC', 'firstname' => 'ASC']),
         ]);
     }
 }

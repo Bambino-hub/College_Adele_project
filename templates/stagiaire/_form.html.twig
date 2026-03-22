@@ -1,0 +1,7 @@
+{{ form_start(form) }}
+{{ form_widget(form) }}
+<div class="d-flex gap-2">
+	<button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+	<a href="{{ path('app_stagiaire_index') }}" class="btn btn-secondary">Annuler</a>
+</div>
+{{ form_end(form) }}

@@ -1,11 +1,14 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New ClassName{% endblock %}
+{% block title %}New ClassName
+{% endblock %}
 
 {% block body %}
-    <h1>Create new ClassName</h1>
+	{% for message in app.flashes('success') %}
+		<div class="alert alert-success">{{ message }}</div>
+	{% endfor %}
 
-    {{ include('class_name/_form.html.twig') }}
+	<h1>Create new ClassName</h1>
 
-    <a href="{{ path('app_class_name_index') }}">back to list</a>
+	{{ include('class_name/_form.html.twig', {'finish_path': path('app_class_name_index')}) }}
 {% endblock %}

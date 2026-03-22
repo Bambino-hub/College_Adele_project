@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Stagiaire;
 use App\Repository\MatterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -33,10 +34,17 @@ class Matter
     #[ORM\OneToMany(targetEntity: Examen::class, mappedBy: 'matiere')]
     private Collection $examens;
 
+    /**
+     * @var Collection<int, Stagiaire>
+     */
+    #[ORM\OneToMany(targetEntity: Stagiaire::class, mappedBy: 'matiereDeStage')]
+    private Collection $stagiaires;
+
     public function __construct()
     {
         $this->enseignements = new ArrayCollection();
         $this->examens = new ArrayCollection();
+        $this->stagiaires = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -110,6 +118,35 @@ class Matter
             // set the owning side to null (unless already changed)
             if ($examen->getMatiere() === $this) {
                 $examen->setMatiere(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Stagiaire>
+     */
+    public function getStagiaires(): Collection
+    {
+        return $this->stagiaires;
+    }
+
+    public function addStagiaire(Stagiaire $stagiaire): static
+    {
+        if (!$this->stagiaires->contains($stagiaire)) {
+            $this->stagiaires->add($stagiaire);
+            $stagiaire->setMatiereDeStage($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStagiaire(Stagiaire $stagiaire): static
+    {
+        if ($this->stagiaires->removeElement($stagiaire)) {
+            if ($stagiaire->getMatiereDeStage() === $this) {
+                $stagiaire->setMatiereDeStage(null);
             }
         }
 

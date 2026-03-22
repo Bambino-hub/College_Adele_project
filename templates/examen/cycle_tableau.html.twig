@@ -1,0 +1,175 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Examens -
+	{{ cycle.name }}
+{% endblock %}
+
+{% block body %}
+	<div class="container mt-4">
+		<style>
+			.exam-program-card {
+				border: 1px solid #222;
+				box-shadow: none;
+			}
+
+			.exam-program-title {
+				font-size: 1.05rem;
+				letter-spacing: 0.02em;
+				text-transform: uppercase;
+			}
+
+			.exam-program-table {
+				font-size: 0.9rem;
+			}
+
+			.exam-program-table th,
+			.exam-program-table td {
+				border: 1px solid #222 !important;
+				vertical-align: top;
+			}
+
+			.exam-program-table thead th {
+				background: #f1f1f1;
+				text-transform: uppercase;
+				font-weight: 700;
+				font-size: 0.82rem;
+				text-align: center;
+			}
+
+			.exam-program-day {
+				font-weight: 700;
+				font-size: 0.84rem;
+				text-transform: uppercase;
+			}
+
+			.exam-program-slot {
+				font-weight: 600;
+				font-size: 0.84rem;
+				white-space: nowrap;
+			}
+
+			.exam-entry {
+				padding: 0.35rem;
+				border: 1px solid #d9d9d9;
+				border-radius: 0.2rem;
+				margin-bottom: 0.35rem;
+			}
+
+			.exam-entry:last-child {
+				margin-bottom: 0;
+			}
+		</style>
+
+		<h2 class="mb-3">Programme des devoirs -
+			{{ cycle.name }}</h2>
+
+		<form method="get" action="{{ path('app_examen_cycle_index', {'id': cycle.id}) }}" class="card card-body mb-4 border-0 shadow-sm">
+			<div class="row g-3 align-items-end">
+				<div class="col-md-3">
+					<label class="form-label fw-semibold" for="periode">Periode</label>
+					<select id="periode" name="periode" class="form-select">
+						<option value="premiere" {{ headerConfig.periode == 'premiere' ? 'selected' : '' }}>Premiere periode de cours</option>
+						<option value="deuxieme" {{ headerConfig.periode == 'deuxieme' ? 'selected' : '' }}>Deuxieme periode de cours</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label fw-semibold" for="trimestre">Trimestre</label>
+					<select id="trimestre" name="trimestre" class="form-select">
+						<option value="1" {{ headerConfig.trimestre == '1' ? 'selected' : '' }}>Premier</option>
+						<option value="2" {{ headerConfig.trimestre == '2' ? 'selected' : '' }}>Deuxieme</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label fw-semibold" for="annee_scolaire">Annee scolaire</label>
+					<input id="annee_scolaire" name="annee_scolaire" class="form-control" value="{{ headerConfig.anneeScolaire }}">
+				</div>
+				<div class="col-md-3">
+					<label class="form-label fw-semibold" for="entete">Entete personnalisee</label>
+					<input id="entete" name="entete" class="form-control" value="{{ headerConfig.customHeader }}" placeholder="Texte libre (optionnel)">
+				</div>
+				<div class="col-md-2 d-grid">
+					<button class="btn btn-dark" type="submit">Appliquer</button>
+				</div>
+			</div>
+		</form>
+
+		<div class="d-flex flex-wrap gap-2 mb-4">
+			<a href="{{ path('app_examen_new_for_cycle', {'id': cycle.id}) }}" class="btn btn-primary">Créer un examen</a>
+			<a href="{{ path('app_examen_cycle_export_pdf', { 'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-outline-secondary">Exporter les examens en PDF</a>
+			<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Générer les surveillants</a>
+			<a href="{{ path('surveillance_tableau_cycle', {'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-info">Afficher les surveillants</a>
+			<a href="{{ path('surveillance_tableau_export_cycle', {'format': 'pdf', 'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-outline-info">Exporter le tableau de surveillance en PDF</a>
+		</div>
+
+		<div class="card exam-program-card">
+			<div class="card-body">
+				<div class="text-center mb-3">
+					<h5 class="fw-bold mb-1 exam-program-title">{{ headerConfig.title }}</h5>
+					<div class="text-muted small">{{ headerConfig.cycleLine }}</div>
+				</div>
+
+				{% if programRows is empty %}
+					<div class="alert alert-info">Aucun examen trouvé pour ce cycle.</div>
+				{% else %}
+					<div class="table-responsive">
+						<table class="table exam-program-table align-middle mb-0">
+							<thead>
+								<tr>
+									<th style="min-width: 190px;">Jours</th>
+									<th style="min-width: 115px;">Heures</th>
+									{% for level in orderedLevels %}
+										<th>{{ level }}</th>
+									{% endfor %}
+								</tr>
+							</thead>
+							<tbody>
+								{% set dayMap = {
+									1: 'LUNDI',
+									2: 'MARDI',
+									3: 'MERCREDI',
+									4: 'JEUDI',
+									5: 'VENDREDI',
+									6: 'SAMEDI',
+									7: 'DIMANCHE'
+								} %}
+								{% for row in programRows %}
+									<tr>
+										<td class="exam-program-day">
+											{{ dayMap[row.date|date('N')] ?? '' }} {{ row.date|date('d/m/Y') }}
+										</td>
+										<td class="exam-program-slot">
+											{{ row.slot }}
+										</td>
+										{% for level in orderedLevels %}
+											<td>
+												{% if row.cells[level] is not empty %}
+													{% for entry in row.cells[level] %}
+														<div class="exam-entry">
+															<div>{{ entry.label }}</div>
+															{% if entry.id is not null %}
+																<div class="d-flex gap-2 mt-2">
+																	<a href="{{ path('app_examen_edit', {'id': entry.id, 'cycle_id': cycle.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+																	<form method="post" action="{{ path('app_examen_delete', {'id': entry.id, 'cycle_id': cycle.id}) }}" onsubmit="return confirm('Supprimer cet examen ?');">
+																		<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ entry.id) }}">
+																		<input type="hidden" name="cycle_id" value="{{ cycle.id }}">
+																		<button class="btn btn-sm btn-danger" type="submit">Supprimer</button>
+																	</form>
+																</div>
+															{% endif %}
+														</div>
+													{% endfor %}
+												{% else %}
+													<span class="text-muted">-</span>
+												{% endif %}
+											</td>
+										{% endfor %}
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

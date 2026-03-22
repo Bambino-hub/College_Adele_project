@@ -2,43 +2,167 @@
 
 {% block body %}
 	<div class="container mt-4">
+		<style>
+			.surveillance-program-card {
+				border: 1px solid #222;
+				box-shadow: none;
+			}
 
-		<h2>Tableau de surveillance</h2>
+			.surveillance-program-table {
+				font-size: 0.9rem;
+			}
 
-		<div class="mb-3">
-			<a href="{{ path('surveillance_tableau_export', {'format': 'pdf'}) }}" class="btn btn-primary">Exporter en PDF</a>
-			<!-- <a href="{{ path('surveillance_tableau_export', {'format': 'excel'}) }}" class="btn btn-success">Exporter en Excel</a> -->
-			<a href="{{ path('surveillance_tableau_export', {'format': 'word'}) }}" class="btn btn-info">Exporter en Word</a>
+			.surveillance-program-table th,
+			.surveillance-program-table td {
+				border: 1px solid #222 !important;
+				vertical-align: top;
+			}
+
+			.surveillance-program-table thead th {
+				background: #f1f1f1;
+				text-transform: uppercase;
+				font-weight: 700;
+				font-size: 0.82rem;
+				text-align: center;
+			}
+
+			.surveillance-day {
+				font-weight: 700;
+				font-size: 0.84rem;
+				text-transform: uppercase;
+			}
+
+			.surveillance-slot {
+				font-weight: 600;
+				font-size: 0.84rem;
+				white-space: nowrap;
+			}
+
+			.surveillance-entry {
+				padding: 0.35rem;
+				border: 1px solid #d9d9d9;
+				border-radius: 0.2rem;
+				margin-bottom: 0.35rem;
+			}
+
+			.surveillance-assignment {
+				margin-bottom: 0.2rem;
+				font-size: 0.88rem;
+			}
+
+			.surveillance-entry:last-child {
+				margin-bottom: 0;
+			}
+		</style>
+
+		<form method="get" action="{{ path('surveillance_tableau_cycle', {'id': cycle.id}) }}" class="card card-body mb-4 border-0 shadow-sm">
+			<div class="row g-3 align-items-end">
+				<div class="col-md-3">
+					<label class="form-label fw-semibold" for="periode">Periode</label>
+					<select id="periode" name="periode" class="form-select">
+						<option value="premiere" {{ headerConfig.periode == 'premiere' ? 'selected' : '' }}>Premiere periode de cours</option>
+						<option value="deuxieme" {{ headerConfig.periode == 'deuxieme' ? 'selected' : '' }}>Deuxieme periode de cours</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label fw-semibold" for="trimestre">Trimestre</label>
+					<select id="trimestre" name="trimestre" class="form-select">
+						<option value="1" {{ headerConfig.trimestre == '1' ? 'selected' : '' }}>Premier</option>
+						<option value="2" {{ headerConfig.trimestre == '2' ? 'selected' : '' }}>Deuxieme</option>
+					</select>
+				</div>
+				<div class="col-md-2">
+					<label class="form-label fw-semibold" for="annee_scolaire">Annee scolaire</label>
+					<input id="annee_scolaire" name="annee_scolaire" class="form-control" value="{{ headerConfig.anneeScolaire }}">
+				</div>
+				<div class="col-md-3">
+					<label class="form-label fw-semibold" for="entete">Entete personnalisee</label>
+					<input id="entete" name="entete" class="form-control" value="{{ headerConfig.customHeader }}" placeholder="Texte libre (optionnel)">
+				</div>
+				<div class="col-md-2 d-grid">
+					<button class="btn btn-dark" type="submit">Appliquer</button>
+				</div>
+			</div>
+		</form>
+
+		<h2>
+			Tableau de surveillance
+												-
+			{{ cycle.name }}
+		</h2>
+
+		<div class="d-flex flex-wrap gap-2 mb-3">
+			<a href="{{ path('app_examen_cycle_index', {'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-outline-secondary">Retour aux examens</a>
+			<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Régénérer les surveillances</a>
+			<a href="{{ path('surveillance_tableau_export_cycle', {'format': 'pdf', 'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-primary">Exporter le tableau en PDF</a>
 		</div>
 
-		<table class="table table-bordered table-striped">
-			<thead class="table-dark">
-				<tr>
-					<th>Date</th>
-					<th>6eme</th>
-					<th>5eme</th>
-					<th>4eme</th>
-					<th>3eme</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for date, niveaux in tableau %}
-					<tr>
-						<td>{{ date|date('d/m/Y') }}</td>
-						{# on parcourt dans l’ordre désiré #}
-						{% for niveau in ['6eme','5eme','4eme','3eme'] %}
-							<td>
-								{% if niveaux[niveau] is defined %}
-									<strong>{{ niveaux[niveau].matiere }}</strong><br>
-									{% for s in niveaux[niveau].surveillants %}
-										{{ s }}<br>
+		<div class="text-center mb-3">
+			<h5 class="fw-bold mb-1">{{ headerConfig.title }}</h5>
+			<div class="text-muted small">{{ headerConfig.cycleLine }}</div>
+		</div>
+
+		<div class="card surveillance-program-card">
+			<div class="card-body">
+				{% if programRows is empty %}
+					<div class="alert alert-info mb-0">Aucune surveillance générée.</div>
+				{% else %}
+					<div class="table-responsive">
+						<table class="table surveillance-program-table align-middle mb-0">
+							<thead>
+								<tr>
+									<th style="min-width: 190px;">Jours</th>
+									<th style="min-width: 115px;">Heures</th>
+									{% for niveau in orderedLevels %}
+										<th>{{ niveau }}</th>
 									{% endfor %}
-								{% endif %}
-							</td>
-						{% endfor %}
-					</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+								</tr>
+							</thead>
+							<tbody>
+								{% set dayMap = {
+									1: 'LUNDI',
+									2: 'MARDI',
+									3: 'MERCREDI',
+									4: 'JEUDI',
+									5: 'VENDREDI',
+									6: 'SAMEDI',
+									7: 'DIMANCHE'
+								} %}
+
+								{% for row in programRows %}
+									<tr>
+										<td class="surveillance-day">{{ dayMap[row.date|date('N')] ?? '' }} {{ row.date|date('d/m/Y') }}</td>
+										<td class="surveillance-slot">{{ row.slot }}</td>
+										{% for niveau in orderedLevels %}
+											<td>
+												{% if row.cells[niveau] is not empty %}
+													{% for entry in row.cells[niveau] %}
+														<div class="surveillance-entry">
+															<div class="fw-semibold">{{ entry.matiere }}</div>
+															{% if entry.assignments is not empty %}
+																{% for className, surveillants in entry.assignments %}
+																	<div class="surveillance-assignment">
+																		<span class="text-muted">{{ className }}:</span>
+																		{{ surveillants|join(', ') }}
+																	</div>
+																{% endfor %}
+															{% else %}
+																<div class="text-muted">Aucun surveillant</div>
+															{% endif %}
+														</div>
+													{% endfor %}
+												{% else %}
+													<span class="text-muted">-</span>
+												{% endif %}
+											</td>
+										{% endfor %}
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				{% endif %}
+			</div>
+		</div>
 	</div>
 {% endblock %}

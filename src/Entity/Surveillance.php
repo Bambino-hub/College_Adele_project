@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
+use App\Entity\Stagiaire;
 use App\Repository\SurveillanceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: SurveillanceRepository::class)]
 class Surveillance
@@ -18,8 +21,12 @@ class Surveillance
     private ?Examen $examen = null;
 
     #[ORM\ManyToOne(inversedBy: 'surveillances')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
     private ?Teatchers $enseignant = null;
+
+    #[ORM\ManyToOne(inversedBy: 'surveillances')]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'CASCADE')]
+    private ?Stagiaire $stagiaire = null;
 
     #[ORM\ManyToOne(inversedBy: 'surveillances')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
@@ -54,6 +61,26 @@ class Surveillance
     {
         $this->enseignant = $enseignant;
 
+        if ($enseignant !== null) {
+            $this->stagiaire = null;
+        }
+
+        return $this;
+    }
+
+    public function getStagiaire(): ?Stagiaire
+    {
+        return $this->stagiaire;
+    }
+
+    public function setStagiaire(?Stagiaire $stagiaire): static
+    {
+        $this->stagiaire = $stagiaire;
+
+        if ($stagiaire !== null) {
+            $this->enseignant = null;
+        }
+
         return $this;
     }
 
@@ -79,5 +106,32 @@ class Surveillance
         $this->salle = $salle;
 
         return $this;
+    }
+
+    public function getSurveillantFullName(): string
+    {
+        return $this->enseignant?->getFullName() ?? $this->stagiaire?->getFullName() ?? '';
+    }
+
+    public function getSurveillantType(): string
+    {
+        if ($this->enseignant !== null) {
+            return 'enseignant';
+        }
+
+        if ($this->stagiaire !== null) {
+            return 'stagiaire';
+        }
+
+        return '';
+    }
+
+    #[Assert\Callback]
+    public function validateSingleSupervisor(ExecutionContextInterface $context): void
+    {
+        if (($this->enseignant === null && $this->stagiaire === null) || ($this->enseignant !== null && $this->stagiaire !== null)) {
+            $context->buildViolation('Une surveillance doit être affectée à un enseignant ou à un stagiaire.')
+                ->addViolation();
+        }
     }
 }

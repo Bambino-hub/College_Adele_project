@@ -43,6 +43,8 @@ class ClassName
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Niveau $niveau = null;
 
+    #[ORM\ManyToOne(inversedBy: 'classNames')]
+    private ?Serie $serie = null;
 
     public function __construct()
     {
@@ -163,6 +165,18 @@ class ClassName
     public function setNiveau(?Niveau $niveau): static
     {
         $this->niveau = $niveau;
+
+        return $this;
+    }
+
+    public function getSerie(): ?Serie
+    {
+        return $this->serie;
+    }
+
+    public function setSerie(?Serie $serie): static
+    {
+        $this->serie = $serie;
 
         return $this;
     }

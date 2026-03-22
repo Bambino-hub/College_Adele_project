@@ -70,8 +70,38 @@ class TeatchersRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('t')
             ->leftJoin('t.surveillances', 's')
+            ->where('t.canSupervise = true')
             ->groupBy('t.id')
             ->orderBy('COUNT(s.id)', 'ASC')
+            ->addOrderBy('t.lastname', 'ASC')
+            ->addOrderBy('t.firstname', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findTeachersEligibleForCycleOrderedByGlobalSurveillanceCount(int $cycleId): array
+    {
+        $cycleCode = $cycleId === 1 ? Teatchers::PDF_CYCLE_1 : Teatchers::PDF_CYCLE_2;
+
+        return $this->findTeachersEligibleForPdfCycleOrderedByGlobalSurveillanceCount($cycleCode);
+    }
+
+    public function findTeachersEligibleForPdfCycleOrderedByGlobalSurveillanceCount(string $cycleCode): array
+    {
+        if (!in_array($cycleCode, [Teatchers::PDF_CYCLE_1, Teatchers::PDF_CYCLE_2], true)) {
+            $cycleCode = Teatchers::PDF_CYCLE_1;
+        }
+
+        return $this->createQueryBuilder('t')
+            ->leftJoin('t.surveillances', 's')
+            ->where('t.canSupervise = true')
+            ->andWhere('t.pdfCycle = :cycleCode OR t.pdfCycle = :bothCycles')
+            ->groupBy('t.id')
+            ->orderBy('COUNT(DISTINCT s.id)', 'ASC')
+            ->addOrderBy('t.lastname', 'ASC')
+            ->addOrderBy('t.firstname', 'ASC')
+            ->setParameter('cycleCode', $cycleCode)
+            ->setParameter('bothCycles', Teatchers::PDF_CYCLE_BOTH)
             ->getQuery()
             ->getResult();
     }

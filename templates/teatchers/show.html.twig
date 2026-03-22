@@ -30,20 +30,32 @@
 					<td>{{ teatcher.id }}</td>
 				</tr>
 				<tr>
-					<th>Lastname</th>
-					<td>{{ teatcher.lastname }}</td>
+					<th>NOM &amp; PRENOMS</th>
+					<td>{{ teatcher.fullName }}</td>
 				</tr>
 				<tr>
-					<th>Firstname</th>
-					<td>{{ teatcher.firstname }}</td>
+					<th>SEXE</th>
+					<td>{{ teatcher.sexe ?: '-' }}</td>
 				</tr>
 				<tr>
-					<th>PhoneNumber</th>
+					<th>MATRICULE</th>
+					<td>{{ teatcher.matricule ?: '-' }}</td>
+				</tr>
+				<tr>
+					<th>STATUT</th>
+					<td>{{ teatcher.statut ?: '-' }}</td>
+				</tr>
+				<tr>
+					<th>DISCIPLINES</th>
+					<td>{{ teatcher.disciplines ?: '-' }}</td>
+				</tr>
+				<tr>
+					<th>Cycle (PDF)</th>
+					<td>{{ teatcher.pdfCycle ?: '-' }}</td>
+				</tr>
+				<tr>
+					<th>CONTACT</th>
 					<td>{{ teatcher.phoneNumber }}</td>
-				</tr>
-				<tr>
-					<th>Email</th>
-					<td>{{ teatcher.email }}</td>
 				</tr>
 			</tbody>
 		</table>

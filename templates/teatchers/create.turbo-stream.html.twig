@@ -2,10 +2,13 @@
 	<template>
 		<tr>
 			<td>{{ teatcher.id }}</td>
-			<td>{{ teatcher.lastname }}</td>
-			<td>{{ teatcher.firstname }}</td>
+			<td>{{ teatcher.fullName }}</td>
+			<td>{{ teatcher.sexe ?: '-' }}</td>
+			<td>{{ teatcher.matricule ?: '-' }}</td>
+			<td>{{ teatcher.statut ?: '-' }}</td>
+			<td>{{ teatcher.disciplines ?: '-' }}</td>
+			<td>{{ teatcher.pdfCycle ?: '-' }}</td>
 			<td>{{ teatcher.phoneNumber }}</td>
-			<td>{{ teatcher.email }}</td>
 			<td class="d-flex gap-3 teachers-action-cell">
 				<a href="{{ path('teatchers_show', {'id': teatcher.id}) }}" class="btn btn-info">show</a>
 				<a href="{{ path('teatchers_edit', {'id': teatcher.id}) }}" class="btn btn-warning">edit</a>
