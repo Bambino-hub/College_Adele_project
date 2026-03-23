@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Enseignement;
+use App\Entity\ClassName;
 use App\Form\EnseignementType;
 use App\Repository\EnseignementRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,17 +25,67 @@ final class EnseignementController extends AbstractController
     }
 
     #[Route('/new', name: 'app_enseignement_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, EnseignementRepository $enseignementRepository): Response
     {
         $enseignement = new Enseignement();
-        $form = $this->createForm(EnseignementType::class, $enseignement);
+        $form = $this->createForm(EnseignementType::class, $enseignement, [
+            'bulk_creation' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($enseignement);
+            $selectedClasses = $form->get('classNames')->getData();
+
+            if (count($selectedClasses) === 0) {
+                $this->addFlash('warning', 'Veuillez selectionner au moins une classe.');
+
+                return $this->render('enseignement/new.html.twig', [
+                    'enseignement' => $enseignement,
+                    'form' => $form,
+                ]);
+            }
+
+            $createdCount = 0;
+
+            foreach ($selectedClasses as $className) {
+                if (!$className instanceof ClassName) {
+                    continue;
+                }
+
+                $existing = $enseignementRepository->findOneBy([
+                    'teacher' => $enseignement->getTeacher(),
+                    'matter' => $enseignement->getMatter(),
+                    'className' => $className,
+                ]);
+
+                if ($existing !== null) {
+                    continue;
+                }
+
+                $newEnseignement = new Enseignement();
+                $newEnseignement
+                    ->setTeacher($enseignement->getTeacher())
+                    ->setMatter($enseignement->getMatter())
+                    ->setClassName($className);
+
+                $entityManager->persist($newEnseignement);
+                ++$createdCount;
+            }
+
+            if ($createdCount === 0) {
+                $this->addFlash('warning', 'Aucun enseignement cree: les associations existent deja.');
+
+                return $this->render('enseignement/new.html.twig', [
+                    'enseignement' => $enseignement,
+                    'form' => $form,
+                ]);
+            }
+
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_enseignement_index', [], Response::HTTP_SEE_OTHER);
+            $this->addFlash('success', sprintf('%d enseignement(s) cree(s) avec succes.', $createdCount));
+
+            return $this->redirectToRoute('app_enseignement_new', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('enseignement/new.html.twig', [
