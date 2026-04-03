@@ -13,36 +13,218 @@
 {% endblock %}
 
 {% block body %}
-	<h1>Enseignement index</h1>
+	<style>
+		.enseignement-page {
+			max-width: 1180px;
+			margin: 24px auto;
+			padding: 18px 12px 28px;
+			border-radius: 14px;
+			background: linear-gradient(180deg, #f8fbff 0%, #ffffff 48%);
+		}
 
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Id</th>
-				<th>actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for enseignement in enseignements %}
-				<tr>
-					<td>{{ enseignement.id }}</td>
-					<td>{{ enseignement.teacher.lastname }}
-						-
-						{{ enseignement.matter.nom }}
-						-
-						{{ enseignement.className.name }}</td>
-					<td>
-						<a href="{{ path('app_enseignement_show', {'id': enseignement.id}) }}">show</a>
-						<a href="{{ path('app_enseignement_edit', {'id': enseignement.id}) }}">edit</a>
-					</td>
-				</tr>
-			{% else %}
-				<tr>
-					<td colspan="2">no records found</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+		.enseignement-page .page-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			gap: 12px;
+			margin-bottom: 18px;
+			padding: 8px 2px;
+			border-bottom: 1px solid #e2e8f0;
+		}
 
-	<a href="{{ path('app_enseignement_new') }}">Create new</a>
+		.enseignement-page .page-title {
+			margin: 0;
+			font-size: 1.55rem;
+			font-weight: 700;
+			color: #0f2f57;
+			letter-spacing: 0.01em;
+		}
+
+		.enseignement-page .page-header .btn-success {
+			border-radius: 999px;
+			font-weight: 600;
+			padding: 0.5rem 0.95rem;
+			box-shadow: 0 8px 16px rgba(22, 163, 74, 0.16);
+		}
+
+		.enseignement-page .table-card {
+			background: #fff;
+			border: 1px solid #dbe3ee;
+			border-radius: 14px;
+			overflow: hidden;
+			box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+		}
+
+		.enseignement-page .table {
+			margin-bottom: 0;
+			border-collapse: separate;
+			border-spacing: 0;
+		}
+
+		.enseignement-page thead th {
+			background: #eef4fb;
+			font-size: 0.92rem;
+			text-transform: uppercase;
+			letter-spacing: 0.03em;
+			color: #26415f;
+			vertical-align: middle;
+			border-bottom: 1px solid #d8e2ef;
+			padding-top: 0.85rem;
+			padding-bottom: 0.85rem;
+		}
+
+		.enseignement-page tbody tr {
+			transition: background-color 0.2s ease;
+		}
+
+		.enseignement-page tbody tr:hover {
+			background-color: #f8fbff;
+		}
+
+		.enseignement-page tbody td {
+			vertical-align: top;
+			padding-top: 0.85rem;
+			padding-bottom: 0.85rem;
+			border-color: #e9eef5;
+		}
+
+		.enseignant-name {
+			font-weight: 600;
+			color: #0f2942;
+			min-width: 210px;
+			background: #f8fbff;
+		}
+
+		.matter-name {
+			font-weight: 600;
+			color: #1f3b57;
+			white-space: nowrap;
+		}
+
+		.assignment-stack {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
+			min-width: 170px;
+		}
+
+		.assignment-item {
+			display: flex;
+			align-items: center;
+			min-height: 34px;
+		}
+
+		.assignment-item .badge {
+			font-size: 0.82rem;
+			font-weight: 600;
+			padding: 0.5em 0.7em;
+			background: #dbeafe;
+			color: #0b3d72;
+			border: 1px solid #bfdbfe;
+		}
+
+		.assignment-actions {
+			display: flex;
+			gap: 8px;
+			align-items: center;
+			justify-content: flex-start;
+		}
+
+		.assignment-actions form {
+			margin: 0;
+		}
+
+		.empty-cell {
+			text-align: center;
+			color: #64748b;
+			padding: 24px !important;
+		}
+
+		@media(max-width: 860px) {
+			.enseignement-page {
+				margin: 12px auto;
+				padding: 10px 8px 18px;
+			}
+
+			.enseignement-page .page-header {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 10px;
+			}
+
+			.enseignement-page .page-title {
+				font-size: 1.25rem;
+			}
+
+			.enseignement-page .table-card {
+				overflow-x: auto;
+			}
+
+			.enseignement-page .table {
+				min-width: 700px;
+			}
+
+			.assignment-actions {
+				flex-wrap: wrap;
+			}
+		}
+	</style>
+
+	<div class="enseignement-page">
+		<div class="page-header">
+			<h1 class="page-title">Liste des enseignants avec leurs classes</h1>
+			<a class="btn btn-success" href="{{ path('app_enseignement_new') }}">Ajouter un enseignement</a>
+		</div>
+
+		<div class="table-card">
+			<table class="table table-hover align-middle">
+				<thead>
+					<tr>
+						<th>Nom et prenom de l'enseignant</th>
+						<th>Matiere</th>
+						<th>Classes</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for teacherTeaching in teacherTeachings %}
+						{% for matterTeaching in teacherTeaching.matters %}
+							<tr>
+								{% if loop.first %}
+									<td class="enseignant-name" rowspan="{{ teacherTeaching.matters|length }}">{{ teacherTeaching.teacher_full_name }}</td>
+								{% endif %}
+								<td class="matter-name">{{ matterTeaching.matter_name }}</td>
+								<td>
+									<div class="assignment-stack">
+										{% for assignment in matterTeaching.assignments %}
+											<div class="assignment-item">
+												<span class="badge rounded-pill">{{ assignment.class_name }}</span>
+											</div>
+										{% endfor %}
+									</div>
+								</td>
+								<td>
+									<div class="assignment-stack">
+										{% for assignment in matterTeaching.assignments %}
+											<div class="assignment-item assignment-actions">
+												<a class="btn btn-sm btn-outline-primary" href="{{ path('app_enseignement_edit', {'id': assignment.id}) }}">Editer</a>
+												<form method="post" action="{{ path('app_enseignement_delete', {'id': assignment.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer cet enseignement ?');">
+													<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ assignment.id) }}">
+													<button class="btn btn-sm btn-outline-danger">Supprimer</button>
+												</form>
+											</div>
+										{% endfor %}
+									</div>
+								</td>
+							</tr>
+						{% endfor %}
+					{% else %}
+						<tr>
+							<td class="empty-cell" colspan="4">Aucun enseignement trouve.</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
 {% endblock %}

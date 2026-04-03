@@ -123,8 +123,10 @@ class SurveillanceController extends AbstractController
             }
 
             $fullName = trim($surveillance->getSurveillantFullName());
-            if ($fullName !== '') {
-                $grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey]['assignments'][$classLabel][$fullName] = $fullName;
+            $displayName = $this->resolveDisplaySupervisorName($surveillance);
+
+            if ($fullName !== '' && $displayName !== '') {
+                $grouped[$dateKey][$slotKey]['levels'][$displayLevel][$entryKey]['assignments'][$classLabel][$fullName] = $displayName;
             }
         }
 
@@ -188,6 +190,23 @@ class SurveillanceController extends AbstractController
             'tle d2', 'tle d' => 'Tle D2',
             default => $className,
         };
+    }
+
+    private function resolveDisplaySupervisorName(\App\Entity\Surveillance $surveillance): string
+    {
+        $lastName = trim((string) ($surveillance->getEnseignant()?->getLastname() ?? $surveillance->getStagiaire()?->getLastname() ?? ''));
+
+        if ($lastName !== '') {
+            return $lastName;
+        }
+
+        $fullName = trim($surveillance->getSurveillantFullName());
+
+        if ($fullName === '') {
+            return '';
+        }
+
+        return preg_split('/\s+/', $fullName)[0] ?? $fullName;
     }
 
     /**

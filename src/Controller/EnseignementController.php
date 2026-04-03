@@ -18,8 +18,69 @@ final class EnseignementController extends AbstractController
     #[Route(name: 'app_enseignement_index', methods: ['GET'])]
     public function index(EnseignementRepository $enseignementRepository): Response
     {
+        $groupedByTeacher = [];
+
+        foreach ($enseignementRepository->findAll() as $enseignement) {
+            $teacher = $enseignement->getTeacher();
+            $matter = $enseignement->getMatter();
+            $className = $enseignement->getClassName();
+
+            if ($teacher === null || $matter === null || $className === null) {
+                continue;
+            }
+
+            $teacherId = $teacher->getId() ?? spl_object_id($teacher);
+            $matterId = $matter->getId() ?? spl_object_id($matter);
+            $teacherFullName = trim(sprintf('%s %s', $teacher->getLastname() ?? '', $teacher->getFirstname() ?? ''));
+
+            if (!isset($groupedByTeacher[$teacherId])) {
+                $groupedByTeacher[$teacherId] = [
+                    'teacher_full_name' => $teacherFullName,
+                    'matters' => [],
+                ];
+            }
+
+            if (!isset($groupedByTeacher[$teacherId]['matters'][$matterId])) {
+                $groupedByTeacher[$teacherId]['matters'][$matterId] = [
+                    'matter_name' => $matter->getNom() ?? '',
+                    'assignments' => [],
+                ];
+            }
+
+            $assignmentId = $enseignement->getId();
+            if ($assignmentId === null) {
+                continue;
+            }
+
+            $groupedByTeacher[$teacherId]['matters'][$matterId]['assignments'][$assignmentId] = [
+                'id' => $assignmentId,
+                'class_name' => $className->getName() ?? '',
+            ];
+        }
+
+        foreach ($groupedByTeacher as &$teacherData) {
+            foreach ($teacherData['matters'] as &$matterData) {
+                usort(
+                    $matterData['assignments'],
+                    static fn(array $left, array $right): int => strcmp($left['class_name'], $right['class_name'])
+                );
+            }
+            unset($matterData);
+
+            uasort(
+                $teacherData['matters'],
+                static fn(array $left, array $right): int => strcmp($left['matter_name'], $right['matter_name'])
+            );
+        }
+        unset($teacherData);
+
+        uasort(
+            $groupedByTeacher,
+            static fn(array $left, array $right): int => strcmp($left['teacher_full_name'], $right['teacher_full_name'])
+        );
+
         return $this->render('enseignement/index.html.twig', [
-            'enseignements' => $enseignementRepository->findAll(),
+            'teacherTeachings' => array_values($groupedByTeacher),
         ]);
         // return $this->json($enseignementRepository->findAll(), Response::HTTP_OK, [], ['groups' => 'Enseignement:read']);
     }

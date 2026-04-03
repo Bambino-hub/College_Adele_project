@@ -7,6 +7,28 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    app.surveillance.domain_tokens.litteraire:
+        - fr
+        - francais
+        - philo
+        - histoire
+        - geo
+        - h-g
+        - hg
+        - ang
+        - anglais
+        - all
+        - esp
+        - ecm
+    app.surveillance.domain_tokens.scientifique:
+        - math
+        - svt
+        - pc
+        - pct
+        - physique
+        - chimie
+        - science
+        - biologie
 
 services:
     # default configuration for services in *this* file
@@ -18,6 +40,11 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
+
+    App\Service\SurveillanceGenerator:
+        arguments:
+            $literaryDomainTokens: '%app.surveillance.domain_tokens.litteraire%'
+            $scientificDomainTokens: '%app.surveillance.domain_tokens.scientifique%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

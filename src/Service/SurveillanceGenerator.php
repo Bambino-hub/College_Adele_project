@@ -5,6 +5,8 @@ namespace App\Service;
 use App\Entity\ClassName;
 use App\Entity\Cycles;
 use App\Entity\Examen;
+use App\Entity\Matter;
+use App\Entity\Niveau;
 use App\Entity\Stagiaire;
 use App\Entity\Surveillance;
 use App\Entity\Teatchers;
@@ -17,7 +19,9 @@ class SurveillanceGenerator
     public function __construct(
         private TeatchersRepository $teacherRepository,
         private StagiaireRepository $stagiaireRepository,
-        private EntityManagerInterface $em
+        private EntityManagerInterface $em,
+        private array $literaryDomainTokens = ['fr', 'francais', 'philo', 'histoire', 'geo', 'h-g', 'hg', 'ang', 'anglais', 'all', 'esp', 'ecm'],
+        private array $scientificDomainTokens = ['math', 'svt', 'pc', 'pct', 'physique', 'chimie', 'science', 'biologie']
     ) {}
 
     /**
@@ -72,6 +76,8 @@ class SurveillanceGenerator
                 throw new \RuntimeException("Impossible de générer une surveillance pour un examen sans classe.");
             }
 
+            $classes = $this->sortClassesByDescendingLevel($classes);
+
             $slotIndex = $slotIndexes[$this->buildSlotKey($examen)];
             $pairedSupervisorsByClass = [];
             $classNamesInExam = array_map(
@@ -100,15 +106,35 @@ class SurveillanceGenerator
             }
 
             $matterTeachers = [];
+            $domainTeachers = [];
+            $matterTrainees = [];
+            $domainTrainees = [];
+            $examMatter = $examen->getMatiere();
+            $examDomain = $this->resolveDomainFromMatter($examMatter);
 
-            if ($examen->getMatiere() !== null) {
+            if ($examMatter !== null) {
                 $matterTeachers = array_values(array_filter(
                     $teachers,
-                    static fn(Teatchers $teacher): bool => $teacher->teachesMatterInCycle($examen->getMatiere(), $cycle)
+                    static fn(Teatchers $teacher): bool => $teacher->teachesMatterInCycle($examMatter, $cycle)
+                ));
+
+                $matterTrainees = array_values(array_filter(
+                    $trainees,
+                    static fn(Stagiaire $trainee): bool => $trainee->getMatiereDeStage()?->getId() === $examMatter->getId()
                 ));
             }
 
-            $matterTeacherAssigned = false;
+            if ($examDomain !== null) {
+                $domainTeachers = array_values(array_filter(
+                    $teachers,
+                    fn(Teatchers $teacher): bool => $this->isTeacherInDomainForCycle($teacher, $examDomain, $cycle)
+                ));
+
+                $domainTrainees = array_values(array_filter(
+                    $trainees,
+                    fn(Stagiaire $trainee): bool => $this->isTraineeInDomain($trainee, $examDomain)
+                ));
+            }
 
             foreach ($classes as $classe) {
 
@@ -119,6 +145,7 @@ class SurveillanceGenerator
 
                 $assigned = 0; // Nombre de surveillants déjà affectés pour cette classe
 
+                // ── Priorité 0 : candidat pairé (règle spéciale Tle C ↔ Tle D/D2) ──────
                 $pairedCandidate = $this->resolvePairedCandidateForClass($classe, $pairedSupervisorsByClass);
 
                 if ($pairedCandidate !== null) {
@@ -135,9 +162,17 @@ class SurveillanceGenerator
                     $assigned++;
                 }
 
-                if (!$matterTeacherAssigned) {
-                    $matterTeacher = $this->findAvailableTeacher(
+                // ── Priorité 1 : enseignant de la matière au MEME NIVEAU ───────────────
+                // L'enseignant qui enseigne réellement cette matière au niveau de la
+                // classe examinée (ex: 3eme) est prioritaire.
+                if ($assigned < $requiredSupervisorsForClass && $examMatter !== null) {
+                    $tier1Teachers = array_values(array_filter(
                         $matterTeachers,
+                        fn(Teatchers $t): bool => $t->teachesMatterInNiveau($examMatter, $classe->getNiveau())
+                    ));
+
+                    $tier1Teacher = $this->findAvailableTeacher(
+                        $tier1Teachers,
                         $examen,
                         $usedSupervisorKeys,
                         $slotIndex,
@@ -145,11 +180,11 @@ class SurveillanceGenerator
                         $generatedLoadCounts
                     );
 
-                    if ($matterTeacher !== null) {
+                    if ($tier1Teacher !== null) {
                         $this->assignTeacher(
                             $examen,
                             $classe,
-                            $matterTeacher,
+                            $tier1Teacher,
                             $slotIndex,
                             $usedSupervisorKeys,
                             $generatedAssignments,
@@ -158,17 +193,168 @@ class SurveillanceGenerator
                         );
                         $this->registerPairedCandidateForCounterpart(
                             $classe,
-                            [
-                                'type' => 'teacher',
-                                'person' => $matterTeacher,
-                            ],
+                            ['type' => 'teacher', 'person' => $tier1Teacher],
                             $pairedSupervisorsByClass
                         );
-                        $matterTeacherAssigned = true;
                         $assigned++;
                     }
                 }
 
+                // ── Priorité 2 : enseignant de la même matière (autre classe du cycle) ──
+                // Parmi les enseignants de la matière évaluée, on cherche le moins chargé
+                // disponible, même s'il n'enseigne pas précisément dans cette classe.
+                if ($assigned < $requiredSupervisorsForClass && $examMatter !== null) {
+                    $tier2Teacher = $this->findAvailableTeacher(
+                        $matterTeachers,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($tier2Teacher !== null) {
+                        $this->assignTeacher(
+                            $examen,
+                            $classe,
+                            $tier2Teacher,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart(
+                            $classe,
+                            ['type' => 'teacher', 'person' => $tier2Teacher],
+                            $pairedSupervisorsByClass
+                        );
+                        $assigned++;
+                    }
+                }
+
+                // ── Priorité 3 : enseignant du même domaine (littéraire/scientifique)
+                // d'abord au même niveau, puis dans le cycle.
+                if ($assigned < $requiredSupervisorsForClass && $examDomain !== null) {
+                    $tier3TeachersSameLevel = array_values(array_filter(
+                        $domainTeachers,
+                        fn(Teatchers $t): bool => $this->teachesDomainInNiveau($t, $examDomain, $classe->getNiveau(), $cycle)
+                    ));
+
+                    $tier3TeacherSameLevel = $this->findAvailableTeacher(
+                        $tier3TeachersSameLevel,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($tier3TeacherSameLevel !== null) {
+                        $this->assignTeacher(
+                            $examen,
+                            $classe,
+                            $tier3TeacherSameLevel,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart(
+                            $classe,
+                            ['type' => 'teacher', 'person' => $tier3TeacherSameLevel],
+                            $pairedSupervisorsByClass
+                        );
+                        $assigned++;
+                    }
+                }
+
+                if ($assigned < $requiredSupervisorsForClass && $examDomain !== null) {
+                    $tier4Teacher = $this->findAvailableTeacher(
+                        $domainTeachers,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($tier4Teacher !== null) {
+                        $this->assignTeacher(
+                            $examen,
+                            $classe,
+                            $tier4Teacher,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart(
+                            $classe,
+                            ['type' => 'teacher', 'person' => $tier4Teacher],
+                            $pairedSupervisorsByClass
+                        );
+                        $assigned++;
+                    }
+                }
+
+                if ($assigned < $requiredSupervisorsForClass && $examMatter !== null) {
+                    $matterTraineeCandidate = $this->findAvailableCandidateFromList(
+                        'trainee',
+                        $matterTrainees,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($matterTraineeCandidate !== null) {
+                        $this->assignCandidate(
+                            $examen,
+                            $classe,
+                            $matterTraineeCandidate,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart($classe, $matterTraineeCandidate, $pairedSupervisorsByClass);
+                        $assigned++;
+                    }
+                }
+
+                if ($assigned < $requiredSupervisorsForClass && $examDomain !== null) {
+                    $domainTraineeCandidate = $this->findAvailableCandidateFromList(
+                        'trainee',
+                        $domainTrainees,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($domainTraineeCandidate !== null) {
+                        $this->assignCandidate(
+                            $examen,
+                            $classe,
+                            $domainTraineeCandidate,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart($classe, $domainTraineeCandidate, $pairedSupervisorsByClass);
+                        $assigned++;
+                    }
+                }
+
+                // ── Priorité finale : pool général (rotation équitable enseignants + stagiaires)
                 while ($assigned < $requiredSupervisorsForClass) {
                     $candidate = $this->findAvailableCandidate(
                         $teachers,
@@ -295,6 +481,122 @@ class SurveillanceGenerator
         }
 
         return Teatchers::PDF_CYCLE_1;
+    }
+
+    /**
+     * @param ClassName[] $classes
+     * @return ClassName[]
+     */
+    private function sortClassesByDescendingLevel(array $classes): array
+    {
+        usort($classes, function (ClassName $left, ClassName $right): int {
+            $leftPriority = $this->resolveLevelPriority($left->getNiveau());
+            $rightPriority = $this->resolveLevelPriority($right->getNiveau());
+
+            if ($leftPriority !== $rightPriority) {
+                return $rightPriority <=> $leftPriority;
+            }
+
+            return mb_strtolower((string) $left->getName()) <=> mb_strtolower((string) $right->getName());
+        });
+
+        return $classes;
+    }
+
+    private function resolveLevelPriority(?Niveau $niveau): int
+    {
+        $name = mb_strtolower((string) $niveau?->getName());
+
+        return match (true) {
+            str_contains($name, 'tle') || str_contains($name, 'terminale') => 60,
+            str_contains($name, '1ere') || str_contains($name, 'premiere') => 50,
+            str_contains($name, '2nde') || str_contains($name, 'seconde') => 40,
+            str_contains($name, '3eme') => 30,
+            str_contains($name, '4eme') => 20,
+            str_contains($name, '5eme') => 10,
+            str_contains($name, '6eme') => 0,
+            default => -10,
+        };
+    }
+
+    private function resolveDomainFromMatter(?Matter $matter): ?string
+    {
+        return $this->resolveDomainFromLabel($matter?->getNom());
+    }
+
+    private function resolveDomainFromLabel(?string $label): ?string
+    {
+        $normalized = mb_strtolower(trim((string) $label));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        foreach ($this->literaryDomainTokens as $token) {
+            $normalizedToken = mb_strtolower(trim((string) $token));
+            if ($normalizedToken !== '' && str_contains($normalized, $normalizedToken)) {
+                return 'litteraire';
+            }
+        }
+
+        foreach ($this->scientificDomainTokens as $token) {
+            $normalizedToken = mb_strtolower(trim((string) $token));
+            if ($normalizedToken !== '' && str_contains($normalized, $normalizedToken)) {
+                return 'scientifique';
+            }
+        }
+
+        return null;
+    }
+
+    private function isTeacherInDomainForCycle(Teatchers $teacher, string $domain, Cycles $cycle): bool
+    {
+        $disciplineDomain = $this->resolveDomainFromLabel($teacher->getDisciplines());
+        if ($disciplineDomain === $domain) {
+            return true;
+        }
+
+        foreach ($teacher->getEnseignement() as $enseignement) {
+            if ($enseignement->getClassName()?->getNiveau()?->getCycle()?->getId() !== $cycle->getId()) {
+                continue;
+            }
+
+            if ($this->resolveDomainFromLabel($enseignement->getMatter()?->getNom()) === $domain) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function teachesDomainInNiveau(Teatchers $teacher, string $domain, ?Niveau $niveau, Cycles $cycle): bool
+    {
+        if ($niveau === null || $niveau->getId() === null) {
+            return false;
+        }
+
+        foreach ($teacher->getEnseignement() as $enseignement) {
+            $teachingClass = $enseignement->getClassName();
+
+            if ($teachingClass?->getNiveau()?->getCycle()?->getId() !== $cycle->getId()) {
+                continue;
+            }
+
+            if ($teachingClass->getNiveau()?->getId() !== $niveau->getId()) {
+                continue;
+            }
+
+            if ($this->resolveDomainFromLabel($enseignement->getMatter()?->getNom()) === $domain) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function isTraineeInDomain(Stagiaire $trainee, string $domain): bool
+    {
+        return $this->resolveDomainFromLabel($trainee->getMatiereDeStage()?->getNom()) === $domain;
     }
 
     /**

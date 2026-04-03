@@ -227,6 +227,28 @@ class Teatchers
         return false;
     }
 
+    /**
+     * Vérifie si l'enseignant enseigne une matière donnée à un niveau précis.
+     * Utilisé pour prioriser la surveillance par niveau effectivement enseigné.
+     */
+    public function teachesMatterInNiveau(Matter $matter, ?Niveau $niveau): bool
+    {
+        if ($niveau === null || $niveau->getId() === null) {
+            return false;
+        }
+
+        foreach ($this->enseignements as $enseignement) {
+            if (
+                $enseignement->getMatter()?->getId() === $matter->getId()
+                && $enseignement->getClassName()?->getNiveau()?->getId() === $niveau->getId()
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function __toString(): string
     {
         return $this->getFullName();
