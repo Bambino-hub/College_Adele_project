@@ -1,13 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit ClassName{% endblock %}
+{% block title %}Modifier une classe
+{% endblock %}
 
 {% block body %}
-    <h1>Edit ClassName</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Mise à jour</span>
+				<h1 class="crud-hero__title">Modifier une classe</h1>
+				<p class="crud-hero__subtitle">Ajustez les informations de la classe puis enregistrez les changements.</p>
+			</div>
 
-    {{ include('class_name/_form.html.twig', {'button_label': 'Update'}) }}
+			{{ include('class_name/_form.html.twig', {'button_label': 'Mettre à jour', 'finish_path': path('app_class_name_index')}) }}
 
-    <a href="{{ path('app_class_name_index') }}">back to list</a>
-
-    {{ include('class_name/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<a href="{{ path('app_class_name_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+				{{ include('class_name/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

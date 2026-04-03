@@ -1,9 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Serie{% endblock %}
+{% block title %}Créer une série
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Serie</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Organisation académique</span>
+				<h1 class="crud-hero__title">Ajouter une série</h1>
+				<p class="crud-hero__subtitle">Ajoutez une série pour mieux structurer les classes et les groupes pédagogiques du lycée.</p>
+			</div>
 
-    {{ include('serie/_form.html.twig', {'finish_path': path('app_serie_index')}) }}
+			{{ include('serie/_form.html.twig', {'finish_path': path('app_serie_index')}) }}
+		</div>
+	</div>
 {% endblock %}

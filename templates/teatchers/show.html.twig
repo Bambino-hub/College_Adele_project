@@ -1,63 +1,61 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Teatchers
+{% block title %}Fiche enseignant
 {% endblock %}
 
 {% block importmap %}
-
-	{# on charge le js et le css global #}
 	{{ parent() }}
-
-	{# On charge le js et le css des enseignants #}
 	{{ importmap('teachers') }}
 {% endblock %}
 
-
 {% block body %}
-	<div class="teachers-page teachers-show">
-		<h1 class="teachers-title">Détails de l'enseignant</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Consultation</span>
+				<h1 class="crud-hero__title">Fiche de l’enseignant</h1>
+				<p class="crud-hero__subtitle">Visualisez rapidement les informations administratives et pédagogiques de l’enseignant sélectionné.</p>
+			</div>
 
-		<div class="d-flex gap-3 mb-3 teachers-show-actions">
-			<a href="{{ path('teatchers_index') }}" class="btn btn-secondary">Retour à la liste</a>
-			<a href="{{ path('teatchers_edit', {'id': teatcher.id}) }}" class="btn btn-primary">edit</a>
-			{{ include('teatchers/_delete_form.html.twig') }}
+			<div class="crud-card teachers-show-card">
+				<div class="teachers-profile-head">
+					<div>
+						<h2 class="teachers-profile-name">{{ teatcher.fullName }}</h2>
+						<div class="teachers-profile-meta">
+							<span class="crud-badge">{{ teatcher.sexe ?: 'Sexe non renseigné' }}</span>
+							<span class="crud-badge">{{ teatcher.pdfCycle ?: 'Cycle non défini' }}</span>
+							<span class="crud-badge">{{ teatcher.statut ?: 'Statut non renseigné' }}</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="teachers-summary-grid">
+					<div class="teachers-summary-item">
+						<span class="teachers-summary-label">Identifiant</span>
+						<strong>{{ teatcher.id }}</strong>
+					</div>
+					<div class="teachers-summary-item">
+						<span class="teachers-summary-label">Contact</span>
+						<strong>{{ teatcher.phoneNumber ?: '-' }}</strong>
+					</div>
+					<div class="teachers-summary-item teachers-summary-item--wide">
+						<span class="teachers-summary-label">Disciplines</span>
+						<strong>{{ teatcher.disciplines ?: 'Non renseignées' }}</strong>
+					</div>
+					<div class="teachers-summary-item">
+						<span class="teachers-summary-label">Matricule</span>
+						<strong>{{ teatcher.matricule ?: '-' }}</strong>
+					</div>
+				</div>
+			</div>
+
+			<div class="crud-actions">
+				<div class="d-flex flex-wrap gap-2">
+					<a href="{{ path('teatchers_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+					<a href="{{ path('teatchers_edit', {'id': teatcher.id}) }}" class="btn btn-outline-primary">Modifier</a>
+				</div>
+				{{ include('teatchers/_delete_form.html.twig') }}
+			</div>
 		</div>
-
-		<table class="table table-success table-striped teachers-table">
-			<tbody>
-				<tr>
-					<th>Id</th>
-					<td>{{ teatcher.id }}</td>
-				</tr>
-				<tr>
-					<th>NOM &amp; PRENOMS</th>
-					<td>{{ teatcher.fullName }}</td>
-				</tr>
-				<tr>
-					<th>SEXE</th>
-					<td>{{ teatcher.sexe ?: '-' }}</td>
-				</tr>
-				<tr>
-					<th>MATRICULE</th>
-					<td>{{ teatcher.matricule ?: '-' }}</td>
-				</tr>
-				<tr>
-					<th>STATUT</th>
-					<td>{{ teatcher.statut ?: '-' }}</td>
-				</tr>
-				<tr>
-					<th>DISCIPLINES</th>
-					<td>{{ teatcher.disciplines ?: '-' }}</td>
-				</tr>
-				<tr>
-					<th>Cycle (PDF)</th>
-					<td>{{ teatcher.pdfCycle ?: '-' }}</td>
-				</tr>
-				<tr>
-					<th>CONTACT</th>
-					<td>{{ teatcher.phoneNumber }}</td>
-				</tr>
-			</tbody>
-		</table>
 	</div>
 {% endblock %}

@@ -1,41 +1,64 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}ClassName index{% endblock %}
+{% block title %}Classes
+{% endblock %}
 
 {% block body %}
-    <h1>ClassName index</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Vie scolaire</span>
+				<h1 class="crud-hero__title">Gestion des classes</h1>
+				<p class="crud-hero__subtitle">Administrez les classes, leurs niveaux, cycles et séries dans un espace unifié.</p>
+			</div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Cycle</th>
-                <th>Niveau</th>
-                <th>Serie</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for class_name in class_names %}
-            <tr>
-                <td>{{ class_name.id }}</td>
-                <td>{{ class_name.name }}</td>
-                <td>{{ class_name.niveau and class_name.niveau.cycle ? class_name.niveau.cycle.name : '-' }}</td>
-                <td>{{ class_name.niveau ? class_name.niveau.name : '-' }}</td>
-                <td>{{ class_name.serie ? class_name.serie.name : '-' }}</td>
-                <td>
-                    <a href="{{ path('app_class_name_show', {'id': class_name.id}) }}">show</a>
-                    <a href="{{ path('app_class_name_edit', {'id': class_name.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<div class="crud-toolbar mb-3">
+					<div>
+						<h2 class="crud-section-title">Classes enregistrées</h2>
+						<p class="crud-section-text">Consultez rapidement l’affectation de chaque classe.</p>
+					</div>
+					<a href="{{ path('app_class_name_new') }}" class="btn btn-primary">Ajouter une classe</a>
+				</div>
 
-    <a href="{{ path('app_class_name_new') }}">Create new</a>
+				<div class="table-responsive">
+					<table class="table crud-table align-middle">
+						<thead>
+							<tr>
+								<th>Id</th>
+								<th>Nom</th>
+								<th>Cycle</th>
+								<th>Niveau</th>
+								<th>Série</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for class_name in class_names %}
+								<tr>
+									<td>{{ class_name.id }}</td>
+									<td>
+										<span class="crud-badge">{{ class_name.name }}</span>
+									</td>
+									<td>{{ class_name.niveau and class_name.niveau.cycle ? class_name.niveau.cycle.name : '-' }}</td>
+									<td>{{ class_name.niveau ? class_name.niveau.name : '-' }}</td>
+									<td>{{ class_name.serie ? class_name.serie.name : '-' }}</td>
+									<td>
+										<div class="d-flex flex-wrap gap-2">
+											<a href="{{ path('app_class_name_show', {'id': class_name.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+											<a href="{{ path('app_class_name_edit', {'id': class_name.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+										</div>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="6" class="crud-empty">Aucune classe enregistrée.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

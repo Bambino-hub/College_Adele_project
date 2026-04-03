@@ -1,35 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Cycles index{% endblock %}
+{% block title %}Cycles
+{% endblock %}
 
 {% block body %}
-    <h1>Cycles index</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Structure scolaire</span>
+				<h1 class="crud-hero__title">Gestion des cycles</h1>
+				<p class="crud-hero__subtitle">Organisez les grands ensembles académiques comme le collège et le lycée.</p>
+			</div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for cycle in cycles %}
-            <tr>
-                <td>{{ cycle.id }}</td>
-                <td>{{ cycle.name }}</td>
-                <td>
-                    <a href="{{ path('app_cycles_show', {'id': cycle.id}) }}">show</a>
-                    <a href="{{ path('app_cycles_edit', {'id': cycle.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<div class="crud-toolbar mb-3">
+					<div>
+						<h2 class="crud-section-title">Cycles enregistrés</h2>
+						<p class="crud-section-text">Chaque cycle structure les niveaux et les classes associées.</p>
+					</div>
+					<a href="{{ path('app_cycles_new') }}" class="btn btn-primary">Ajouter un cycle</a>
+				</div>
 
-    <a href="{{ path('app_cycles_new') }}">Create new</a>
+				<div class="table-responsive">
+					<table class="table crud-table align-middle">
+						<thead>
+							<tr>
+								<th>Id</th>
+								<th>Nom</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for cycle in cycles %}
+								<tr>
+									<td>{{ cycle.id }}</td>
+									<td>
+										<span class="crud-badge">{{ cycle.name }}</span>
+									</td>
+									<td>
+										<div class="d-flex flex-wrap gap-2">
+											<a href="{{ path('app_cycles_show', {'id': cycle.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+											<a href="{{ path('app_cycles_edit', {'id': cycle.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+										</div>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="3" class="crud-empty">Aucun cycle enregistré.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

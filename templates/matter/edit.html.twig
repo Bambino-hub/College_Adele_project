@@ -1,13 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Matter{% endblock %}
+{% block title %}Modifier une matière
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Matter</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Mise à jour</span>
+				<h1 class="crud-hero__title">Modifier une matière</h1>
+				<p class="crud-hero__subtitle">Mettez à jour les informations de la matière puis validez les changements.</p>
+			</div>
 
-    {{ include('matter/_form.html.twig', {'button_label': 'Update'}) }}
+			{{ include('matter/_form.html.twig', {'button_label': 'Mettre à jour', 'finish_path': path('app_matter_index')}) }}
 
-    <a href="{{ path('app_matter_index') }}">back to list</a>
-
-    {{ include('matter/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<a href="{{ path('app_matter_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+				{{ include('matter/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

@@ -1,31 +1,30 @@
 {% extends 'base.html.twig' %}
 
 {% block importmap %}
-
-	{# on charge le js et le css global #}
 	{{ parent() }}
-
-	{# On charge le js et le css des enseignants #}
 	{{ importmap('teachers') }}
 {% endblock %}
 
-
-{% block title %}Edit Teatchers
+{% block title %}Modifier un enseignant
 {% endblock %}
 
 {% block body %}
-	<div class="teachers-page teachers-edit">
-		<h1 class="teachers-title text-center">Editer l'enseignant</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Mise à jour</span>
+				<h1 class="crud-hero__title">Modifier un enseignant</h1>
+				<p class="crud-hero__subtitle">Ajustez les informations de l’enseignant puis sauvegardez les changements.</p>
+			</div>
 
-		<div class="d-flex gap-3 mb-3 teachers-edit-actions">
-			<a href="{{ path('teatchers_index') }}" class="btn btn-secondary">Retour à la liste</a>
-			{{ include('teatchers/_delete_form.html.twig') }}
+			<div class="crud-actions mb-3">
+				<a href="{{ path('teatchers_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+				{{ include('teatchers/_delete_form.html.twig') }}
+			</div>
 
+			<div class="teachers-form-wrapper">
+				{{ include('teatchers/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+			</div>
 		</div>
-
-		<div class="teachers-form-wrapper">
-			{{ include('teatchers/_form.html.twig', {'button_label': 'Update'}) }}
-		</div>
-
 	</div>
 {% endblock %}

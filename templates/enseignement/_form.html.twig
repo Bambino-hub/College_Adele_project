@@ -1,9 +1,11 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <div class="d-flex gap-2 mt-3">
-        <button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
-        {% if finish_path is defined %}
-            <a href="{{ finish_path }}" class="btn btn-success">Terminer</a>
-        {% endif %}
-    </div>
-{{ form_end(form) }}
+<div class="crud-form-card">
+	{{ form_start(form, {'attr': {'class': 'crud-form'}}) }}
+	{{ form_widget(form) }}
+	<div class="crud-actions">
+		<button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+		{% if finish_path is defined %}
+			<a href="{{ finish_path }}" class="btn btn-outline-secondary">Terminer</a>
+		{% endif %}
+	</div>
+	{{ form_end(form) }}
+</div>

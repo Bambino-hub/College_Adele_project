@@ -1,167 +1,114 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Surveillants -
+	{{ cycle.name }}
+{% endblock %}
+
 {% block body %}
-	<div class="container mt-4">
-		<style>
-			.surveillance-program-card {
-				border: 1px solid #222;
-				box-shadow: none;
-			}
+	<div class="container py-4 schedule-page">
+		<div class="schedule-shell">
+			<section class="schedule-hero schedule-hero--surveillance">
+				<span class="crud-hero__eyebrow">Surveillance</span>
+				<h1 class="schedule-hero__title">Tableau de surveillance -
+					{{ cycle.name }}</h1>
+				<p class="schedule-hero__subtitle">
+					La présentation a été allégée pour rester claire et professionnelle, sans modifier le tableau principal.
+				</p>
+			</section>
 
-			.surveillance-program-table {
-				font-size: 0.9rem;
-			}
-
-			.surveillance-program-table th,
-			.surveillance-program-table td {
-				border: 1px solid #222 !important;
-				vertical-align: top;
-			}
-
-			.surveillance-program-table thead th {
-				background: #f1f1f1;
-				text-transform: uppercase;
-				font-weight: 700;
-				font-size: 0.82rem;
-				text-align: center;
-			}
-
-			.surveillance-day {
-				font-weight: 700;
-				font-size: 0.84rem;
-				text-transform: uppercase;
-			}
-
-			.surveillance-slot {
-				font-weight: 600;
-				font-size: 0.84rem;
-				white-space: nowrap;
-			}
-
-			.surveillance-entry {
-				padding: 0.35rem;
-				border: 1px solid #d9d9d9;
-				border-radius: 0.2rem;
-				margin-bottom: 0.35rem;
-			}
-
-			.surveillance-assignment {
-				margin-bottom: 0.2rem;
-				font-size: 0.88rem;
-			}
-
-			.surveillance-entry:last-child {
-				margin-bottom: 0;
-			}
-		</style>
-
-		<form method="get" action="{{ path('surveillance_tableau_cycle', {'id': cycle.id}) }}" class="card card-body mb-4 border-0 shadow-sm">
-			<div class="row g-3 align-items-end">
-				<div class="col-md-3">
-					<label class="form-label fw-semibold" for="periode">Periode</label>
-					<select id="periode" name="periode" class="form-select">
-						<option value="premiere" {{ headerConfig.periode == 'premiere' ? 'selected' : '' }}>Premiere periode de cours</option>
-						<option value="deuxieme" {{ headerConfig.periode == 'deuxieme' ? 'selected' : '' }}>Deuxieme periode de cours</option>
-					</select>
+			<form method="get" action="{{ path('surveillance_tableau_cycle', {'id': cycle.id}) }}" class="crud-card schedule-config">
+				<div class="schedule-config__row">
+					<div>
+						<h2 class="crud-section-title">Personnaliser l'entete</h2>
+						<p class="crud-section-text">Vous pouvez définir un intitulé libre pour l'affichage ou l'export.</p>
+					</div>
+					<div class="schedule-config__field">
+						<label class="form-label fw-semibold" for="entete">Entete personnalisee</label>
+						<input id="entete" name="entete" class="form-control" value="{{ headerConfig.customHeader }}" placeholder="Texte libre (optionnel)">
+					</div>
+					<div class="schedule-config__submit">
+						<button class="btn btn-dark" type="submit">Appliquer</button>
+					</div>
 				</div>
-				<div class="col-md-2">
-					<label class="form-label fw-semibold" for="trimestre">Trimestre</label>
-					<select id="trimestre" name="trimestre" class="form-select">
-						<option value="1" {{ headerConfig.trimestre == '1' ? 'selected' : '' }}>Premier</option>
-						<option value="2" {{ headerConfig.trimestre == '2' ? 'selected' : '' }}>Deuxieme</option>
-					</select>
-				</div>
-				<div class="col-md-2">
-					<label class="form-label fw-semibold" for="annee_scolaire">Annee scolaire</label>
-					<input id="annee_scolaire" name="annee_scolaire" class="form-control" value="{{ headerConfig.anneeScolaire }}">
-				</div>
-				<div class="col-md-3">
-					<label class="form-label fw-semibold" for="entete">Entete personnalisee</label>
-					<input id="entete" name="entete" class="form-control" value="{{ headerConfig.customHeader }}" placeholder="Texte libre (optionnel)">
-				</div>
-				<div class="col-md-2 d-grid">
-					<button class="btn btn-dark" type="submit">Appliquer</button>
-				</div>
+			</form>
+
+			<div class="schedule-actions">
+				<a href="{{ path('app_examen_cycle_index', {'id': cycle.id, 'entete': headerConfig.customHeader}) }}" class="btn btn-outline-secondary">Retour aux examens</a>
+				<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Régénérer les surveillances</a>
+				<a href="{{ path('surveillance_tableau_export_cycle', {'format': 'pdf', 'id': cycle.id, 'entete': headerConfig.customHeader}) }}" class="btn btn-primary">Exporter le tableau en PDF</a>
 			</div>
-		</form>
 
-		<h2>
-			Tableau de surveillance
-												-
-			{{ cycle.name }}
-		</h2>
+			<div class="card schedule-table-card surveillance-program-card">
+				<div class="card-body schedule-table-card__body">
+					<div class="schedule-heading">
+						<div>
+							<h2 class="schedule-heading__title">{{ headerConfig.title }}</h2>
+							<p class="schedule-heading__subtitle">{{ headerConfig.cycleLine }}</p>
+						</div>
+						<span class="crud-badge">{{ orderedLevels|length }}
+							niveau(x)</span>
+					</div>
 
-		<div class="d-flex flex-wrap gap-2 mb-3">
-			<a href="{{ path('app_examen_cycle_index', {'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-outline-secondary">Retour aux examens</a>
-			<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Régénérer les surveillances</a>
-			<a href="{{ path('surveillance_tableau_export_cycle', {'format': 'pdf', 'id': cycle.id, 'periode': headerConfig.periode, 'trimestre': headerConfig.trimestre, 'annee_scolaire': headerConfig.anneeScolaire, 'entete': headerConfig.customHeader }) }}" class="btn btn-primary">Exporter le tableau en PDF</a>
-		</div>
-
-		<div class="text-center mb-3">
-			<h5 class="fw-bold mb-1">{{ headerConfig.title }}</h5>
-			<div class="text-muted small">{{ headerConfig.cycleLine }}</div>
-		</div>
-
-		<div class="card surveillance-program-card">
-			<div class="card-body">
-				{% if programRows is empty %}
-					<div class="alert alert-info mb-0">Aucune surveillance générée.</div>
-				{% else %}
-					<div class="table-responsive">
-						<table class="table surveillance-program-table align-middle mb-0">
-							<thead>
-								<tr>
-									<th style="min-width: 190px;">Jours</th>
-									<th style="min-width: 115px;">Heures</th>
-									{% for niveau in orderedLevels %}
-										<th>{{ niveau }}</th>
-									{% endfor %}
-								</tr>
-							</thead>
-							<tbody>
-								{% set dayMap = {
-									1: 'LUNDI',
-									2: 'MARDI',
-									3: 'MERCREDI',
-									4: 'JEUDI',
-									5: 'VENDREDI',
-									6: 'SAMEDI',
-									7: 'DIMANCHE'
-								} %}
-
-								{% for row in programRows %}
+					{% if programRows is empty %}
+						<div class="alert alert-info mb-0">Aucune surveillance générée.</div>
+					{% else %}
+						<div class="table-responsive">
+							<table class="table surveillance-program-table align-middle mb-0">
+								<thead>
 									<tr>
-										<td class="surveillance-day">{{ dayMap[row.date|date('N')] ?? '' }} {{ row.date|date('d/m/Y') }}</td>
-										<td class="surveillance-slot">{{ row.slot }}</td>
+										<th style="min-width: 190px;">Jours</th>
+										<th style="min-width: 115px;">Heures</th>
 										{% for niveau in orderedLevels %}
-											<td>
-												{% if row.cells[niveau] is not empty %}
-													{% for entry in row.cells[niveau] %}
-														<div class="surveillance-entry">
-															<div class="fw-semibold">{{ entry.matiere }}</div>
-															{% if entry.assignments is not empty %}
-																{% for className, surveillants in entry.assignments %}
-																	<div class="surveillance-assignment">
-																		<span class="text-muted">{{ className }}:</span>
-																		{{ surveillants|join(', ') }}
-																	</div>
-																{% endfor %}
-															{% else %}
-																<div class="text-muted">Aucun surveillant</div>
-															{% endif %}
-														</div>
-													{% endfor %}
-												{% else %}
-													<span class="text-muted">-</span>
-												{% endif %}
-											</td>
+											<th>{{ niveau }}</th>
 										{% endfor %}
 									</tr>
-								{% endfor %}
-							</tbody>
-						</table>
-					</div>
-				{% endif %}
+								</thead>
+								<tbody>
+									{% set dayMap = {
+										1: 'LUNDI',
+										2: 'MARDI',
+										3: 'MERCREDI',
+										4: 'JEUDI',
+										5: 'VENDREDI',
+										6: 'SAMEDI',
+										7: 'DIMANCHE'
+									} %}
+
+									{% for row in programRows %}
+										<tr>
+											<td class="surveillance-day">{{ dayMap[row.date|date('N')] ?? '' }}
+												{{ row.date|date('d/m/Y') }}</td>
+											<td class="surveillance-slot">{{ row.slot }}</td>
+											{% for niveau in orderedLevels %}
+												<td>
+													{% if row.cells[niveau] is not empty %}
+														{% for entry in row.cells[niveau] %}
+															<div class="surveillance-entry">
+																<div class="fw-semibold">{{ entry.matiere }}</div>
+																{% if entry.assignments is not empty %}
+																	{% for className, surveillants in entry.assignments %}
+																		<div class="surveillance-assignment">
+																			<span class="text-muted">{{ className }}:</span>
+																			{{ surveillants|join(', ') }}
+																		</div>
+																	{% endfor %}
+																{% else %}
+																	<div class="text-muted">Aucun surveillant</div>
+																{% endif %}
+															</div>
+														{% endfor %}
+													{% else %}
+														<span class="text-muted">-</span>
+													{% endif %}
+												</td>
+											{% endfor %}
+										</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>
+					{% endif %}
+				</div>
 			</div>
 		</div>
 	</div>

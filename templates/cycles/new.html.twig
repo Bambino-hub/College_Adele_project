@@ -1,9 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Cycles{% endblock %}
+{% block title %}Créer un cycle
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Cycles</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Structure scolaire</span>
+				<h1 class="crud-hero__title">Ajouter un cycle</h1>
+				<p class="crud-hero__subtitle">Créez un nouveau cycle pour mieux organiser les niveaux et les classes de l’établissement.</p>
+			</div>
 
-    {{ include('cycles/_form.html.twig', {'finish_path': path('app_cycles_index')}) }}
+			{{ include('cycles/_form.html.twig', {'finish_path': path('app_cycles_index')}) }}
+		</div>
+	</div>
 {% endblock %}

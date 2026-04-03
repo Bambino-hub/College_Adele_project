@@ -1,9 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Niveau{% endblock %}
+{% block title %}Créer un niveau
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Niveau</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Organisation académique</span>
+				<h1 class="crud-hero__title">Ajouter un niveau</h1>
+				<p class="crud-hero__subtitle">Créez un nouveau niveau pour organiser plus finement les classes et les séries.</p>
+			</div>
 
-    {{ include('niveau/_form.html.twig', {'finish_path': path('app_niveau_index')}) }}
+			{{ include('niveau/_form.html.twig', {'finish_path': path('app_niveau_index')}) }}
+		</div>
+	</div>
 {% endblock %}

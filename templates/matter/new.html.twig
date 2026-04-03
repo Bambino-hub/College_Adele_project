@@ -1,9 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Matter{% endblock %}
+{% block title %}Créer une matière
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Matter</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Pédagogie</span>
+				<h1 class="crud-hero__title">Ajouter une matière</h1>
+				<p class="crud-hero__subtitle">Enregistrez une nouvelle matière pour les emplois du temps, les enseignements et les examens.</p>
+			</div>
 
-    {{ include('matter/_form.html.twig', {'finish_path': path('app_matter_index')}) }}
+			{{ include('matter/_form.html.twig', {'finish_path': path('app_matter_index')}) }}
+		</div>
+	</div>
 {% endblock %}

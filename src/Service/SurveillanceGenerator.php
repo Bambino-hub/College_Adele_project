@@ -59,6 +59,7 @@ class SurveillanceGenerator
             'teacher' => 0,
             'trainee' => 0,
         ];
+        $pairedSupervisorsBySlot = [];
 
         // ==========================================================
         //  Récupération des données nécessaires
@@ -78,8 +79,14 @@ class SurveillanceGenerator
 
             $classes = $this->sortClassesByDescendingLevel($classes);
 
-            $slotIndex = $slotIndexes[$this->buildSlotKey($examen)];
-            $pairedSupervisorsByClass = [];
+            $slotKey = $this->buildSlotKey($examen);
+            $slotIndex = $slotIndexes[$slotKey];
+
+            if (!isset($pairedSupervisorsBySlot[$slotKey])) {
+                $pairedSupervisorsBySlot[$slotKey] = [];
+            }
+
+            $pairedSupervisorsByClass = &$pairedSupervisorsBySlot[$slotKey];
             $classNamesInExam = array_map(
                 static fn(ClassName $class): string => trim((string) $class->getName()),
                 $classes
@@ -145,7 +152,7 @@ class SurveillanceGenerator
 
                 $assigned = 0; // Nombre de surveillants déjà affectés pour cette classe
 
-                // ── Priorité 0 : candidat pairé (règle spéciale Tle C ↔ Tle D/D2) ──────
+                // ── Priorité 0 : candidat pairé (règle spéciale Tle C ↔ Tle D1) ───────
                 $pairedCandidate = $this->resolvePairedCandidateForClass($classe, $pairedSupervisorsByClass);
 
                 if ($pairedCandidate !== null) {
@@ -233,8 +240,66 @@ class SurveillanceGenerator
                     }
                 }
 
-                // ── Priorité 3 : enseignant du même domaine (littéraire/scientifique)
-                // d'abord au même niveau, puis dans le cycle.
+                // ── Priorité 3 : stagiaires ───────────────────────────────────────
+                // Après les titulaires de la matière, on privilégie les stagiaires
+                // (d'abord de la matière, puis du même domaine).
+                if ($assigned < $requiredSupervisorsForClass && $examMatter !== null) {
+                    $matterTraineeCandidate = $this->findAvailableCandidateFromList(
+                        'trainee',
+                        $matterTrainees,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($matterTraineeCandidate !== null) {
+                        $this->assignCandidate(
+                            $examen,
+                            $classe,
+                            $matterTraineeCandidate,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart($classe, $matterTraineeCandidate, $pairedSupervisorsByClass);
+                        $assigned++;
+                    }
+                }
+
+                if ($assigned < $requiredSupervisorsForClass && $examDomain !== null) {
+                    $domainTraineeCandidate = $this->findAvailableCandidateFromList(
+                        'trainee',
+                        $domainTrainees,
+                        $examen,
+                        $usedSupervisorKeys,
+                        $slotIndex,
+                        $generatedAssignments,
+                        $generatedLoadCounts
+                    );
+
+                    if ($domainTraineeCandidate !== null) {
+                        $this->assignCandidate(
+                            $examen,
+                            $classe,
+                            $domainTraineeCandidate,
+                            $slotIndex,
+                            $usedSupervisorKeys,
+                            $generatedAssignments,
+                            $generatedLoadCounts,
+                            $generatedTypeCounts
+                        );
+                        $this->registerPairedCandidateForCounterpart($classe, $domainTraineeCandidate, $pairedSupervisorsByClass);
+                        $assigned++;
+                    }
+                }
+
+                // ── Priorité 4 : enseignants du même domaine (littéraire/scientifique)
+                // S'il manque encore du monde, on complète avec les enseignants du
+                // même domaine, d'abord au même niveau, puis dans le cycle.
                 if ($assigned < $requiredSupervisorsForClass && $examDomain !== null) {
                     $tier3TeachersSameLevel = array_values(array_filter(
                         $domainTeachers,
@@ -300,60 +365,6 @@ class SurveillanceGenerator
                     }
                 }
 
-                if ($assigned < $requiredSupervisorsForClass && $examMatter !== null) {
-                    $matterTraineeCandidate = $this->findAvailableCandidateFromList(
-                        'trainee',
-                        $matterTrainees,
-                        $examen,
-                        $usedSupervisorKeys,
-                        $slotIndex,
-                        $generatedAssignments,
-                        $generatedLoadCounts
-                    );
-
-                    if ($matterTraineeCandidate !== null) {
-                        $this->assignCandidate(
-                            $examen,
-                            $classe,
-                            $matterTraineeCandidate,
-                            $slotIndex,
-                            $usedSupervisorKeys,
-                            $generatedAssignments,
-                            $generatedLoadCounts,
-                            $generatedTypeCounts
-                        );
-                        $this->registerPairedCandidateForCounterpart($classe, $matterTraineeCandidate, $pairedSupervisorsByClass);
-                        $assigned++;
-                    }
-                }
-
-                if ($assigned < $requiredSupervisorsForClass && $examDomain !== null) {
-                    $domainTraineeCandidate = $this->findAvailableCandidateFromList(
-                        'trainee',
-                        $domainTrainees,
-                        $examen,
-                        $usedSupervisorKeys,
-                        $slotIndex,
-                        $generatedAssignments,
-                        $generatedLoadCounts
-                    );
-
-                    if ($domainTraineeCandidate !== null) {
-                        $this->assignCandidate(
-                            $examen,
-                            $classe,
-                            $domainTraineeCandidate,
-                            $slotIndex,
-                            $usedSupervisorKeys,
-                            $generatedAssignments,
-                            $generatedLoadCounts,
-                            $generatedTypeCounts
-                        );
-                        $this->registerPairedCandidateForCounterpart($classe, $domainTraineeCandidate, $pairedSupervisorsByClass);
-                        $assigned++;
-                    }
-                }
-
                 // ── Priorité finale : pool général (rotation équitable enseignants + stagiaires)
                 while ($assigned < $requiredSupervisorsForClass) {
                     $candidate = $this->findAvailableCandidate(
@@ -389,6 +400,8 @@ class SurveillanceGenerator
                     $assigned++;
                 }
             }
+
+            unset($pairedSupervisorsByClass);
         }
 
         // ==========================================================
@@ -600,8 +613,9 @@ class SurveillanceGenerator
     }
 
     /**
-     * Tle C et Tle D2 (ou Tle D) partagent un seul surveillant si les deux classes
-     * sont presentes dans le meme examen.
+     * Tle C et Tle D1 (ou `Tle D` historique) partagent un seul surveillant.
+     * `Tle D2` garde un surveillant distinct, même si les trois classes sont dans
+     * le même examen ou sur le même créneau.
      *
      * @param string[] $classNamesInExam
      */
@@ -609,7 +623,7 @@ class SurveillanceGenerator
     {
         $normalizedClass = $this->normalizeClassName((string) $classe->getName());
 
-        if (!in_array($normalizedClass, ['tle c', 'tle d2', 'tle d'], true)) {
+        if (!in_array($normalizedClass, ['tle c', 'tle d1', 'tle d2', 'tle d'], true)) {
             return false;
         }
 
@@ -617,8 +631,8 @@ class SurveillanceGenerator
             $candidate = $this->normalizeClassName($className);
 
             if (
-                ($normalizedClass === 'tle c' && in_array($candidate, ['tle d2', 'tle d'], true))
-                || (in_array($normalizedClass, ['tle d2', 'tle d'], true) && $candidate === 'tle c')
+                ($normalizedClass === 'tle c' && in_array($candidate, ['tle d1', 'tle d'], true))
+                || (in_array($normalizedClass, ['tle d1', 'tle d'], true) && $candidate === 'tle c')
             ) {
                 return true;
             }
@@ -638,7 +652,7 @@ class SurveillanceGenerator
      */
     private function resolvePairedCandidateForClass(ClassName $classe, array $pairedSupervisorsByClass): ?array
     {
-        $className = trim((string) $classe->getName());
+        $className = $this->normalizeClassName((string) $classe->getName());
 
         if ($className === '') {
             return null;
@@ -656,7 +670,7 @@ class SurveillanceGenerator
         array $candidate,
         array &$pairedSupervisorsByClass
     ): void {
-        $className = trim((string) $classe->getName());
+        $className = $this->normalizeClassName((string) $classe->getName());
         $counterparts = $this->resolvePairedClassNames($className);
 
         if ($counterparts === []) {
@@ -678,8 +692,8 @@ class SurveillanceGenerator
         $normalized = $this->normalizeClassName($className);
 
         return match ($normalized) {
-            'tle c' => ['Tle D2', 'Tle D'],
-            'tle d2', 'tle d' => ['Tle C'],
+            'tle c' => ['tle d1', 'tle d'],
+            'tle d1', 'tle d' => ['tle c'],
             default => [],
         };
     }

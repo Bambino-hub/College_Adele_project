@@ -1,26 +1,39 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Matter{% endblock %}
+{% block title %}Détail de la matière
+{% endblock %}
 
 {% block body %}
-    <h1>Matter</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Consultation</span>
+				<h1 class="crud-hero__title">Détail de la matière</h1>
+				<p class="crud-hero__subtitle">Visualisez les informations enregistrées pour cette matière.</p>
+			</div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ matter.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ matter.nom }}</td>
-            </tr>
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<table class="table crud-detail-table">
+					<tbody>
+						<tr>
+							<th>Identifiant</th>
+							<td>{{ matter.id }}</td>
+						</tr>
+						<tr>
+							<th>Nom</th>
+							<td>{{ matter.nom }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-    <a href="{{ path('app_matter_index') }}">back to list</a>
-
-    <a href="{{ path('app_matter_edit', {'id': matter.id}) }}">edit</a>
-
-    {{ include('matter/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<div class="d-flex flex-wrap gap-2">
+					<a href="{{ path('app_matter_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+					<a href="{{ path('app_matter_edit', {'id': matter.id}) }}" class="btn btn-outline-primary">Modifier</a>
+				</div>
+				{{ include('matter/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

@@ -1,59 +1,85 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Examen index
+{% block title %}Gestion des examens
 {% endblock %}
 
 {% block body %}
-	<h1>Examen index</h1>
-	<div class="d-flex flex-wrap gap-2 mb-3">
-		{% for cycle in cycles %}
-			<a href="{{ path('app_examen_new_for_cycle', {'id': cycle.id}) }}" class="btn btn-primary">Créer un examen du
-				{{ cycle.name }}</a>
-			<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Générer les surveillances du
-				{{ cycle.name }}</a>
-			<a href="{{ path('surveillance_tableau_cycle', {'id': cycle.id}) }}" class="btn btn-outline-info">Tableau
-				{{ cycle.name }}</a>
-		{% endfor %}
-	</div>
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Id</th>
-				<th>Cycle</th>
-				<th>Date</th>
-				<th>HeursDebut</th>
-				<th>HeureFin</th>
-				<th>Matière</th>
-				<th>classe</th>
-				<th>actions</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for examan in examens %}
-				<tr>
-					<td>{{ examan.id }}</td>
-					<td>{{ examan.cycle ? examan.cycle.name : 'Non défini' }}</td>
-					<td>{{ examan.date ? examan.date|date('Y-m-d') : '' }}</td>
-					<td>{{ examan.heursDebut ? examan.heursDebut|date('H:i:s') : '' }}</td>
-					<td>{{ examan.heureFin ? examan.heureFin|date('H:i:s') : '' }}</td>
-					<td>{{ examan.matiere ? examan.matiere.nom : '' }}</td>
-					<td>
-						{% for item in examan.classe %}
-							<div>{{ item.name }}</div>
-						{% endfor %}
-					</td>
-					<td>
-						<a href="{{ path('app_examen_show', {'id': examan.id}) }}">show</a>
-						<a href="{{ path('app_examen_edit', {'id': examan.id}) }}">edit</a>
-					</td>
-				</tr>
-			{% else %}
-				<tr>
-					<td colspan="8">no records found</td>
-				</tr>
-			{% endfor %}
-		</tbody>
-	</table>
+	<div class="container py-4 exam-index">
+		<div class="exam-shell">
+			<div class="exam-shell__hero">
+				<span class="exam-shell__eyebrow">Organisation académique</span>
+				<h1 class="exam-shell__title">Gestion des examens</h1>
+				<p class="exam-shell__subtitle">
+					Créez les examens par cycle, générez les surveillances et consultez les tableaux depuis un espace plus clair.
+				</p>
+			</div>
 
-	<a href="{{ path('app_examen_new') }}">Create new</a>
+			<div class="exam-index__actions">
+				{% for cycle in cycles %}
+					<div class="exam-index__action-card">
+						<h2>{{ cycle.name }}</h2>
+						<p>Créer les épreuves du cycle, générer les surveillances et consulter le tableau correspondant.</p>
+						<div class="d-flex flex-wrap gap-2">
+							<a href="{{ path('app_examen_new_for_cycle', {'id': cycle.id}) }}" class="btn btn-primary">Créer un examen</a>
+							<a href="{{ path('exam_generate_surveillance_for_cycle', {'id': cycle.id}) }}" class="btn btn-outline-primary">Générer les surveillances</a>
+							<a href="{{ path('surveillance_tableau_cycle', {'id': cycle.id}) }}" class="btn btn-outline-info">Voir le tableau</a>
+						</div>
+					</div>
+				{% endfor %}
+			</div>
+
+			<div class="exam-form-card mt-4">
+				<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+					<h2 class="exam-form__section-title mb-0">Examens enregistrés</h2>
+					<a href="{{ path('app_examen_new') }}" class="btn btn-outline-secondary">Nouvel examen global</a>
+				</div>
+
+				<div class="table-responsive mt-3">
+					<table class="table align-middle exam-table mb-0">
+						<thead>
+							<tr>
+								<th>Id</th>
+								<th>Cycle</th>
+								<th>Date</th>
+								<th>Début</th>
+								<th>Fin</th>
+								<th>Matière</th>
+								<th>Classes</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for examan in examens %}
+								<tr>
+									<td>{{ examan.id }}</td>
+									<td>{{ examan.cycle ? examan.cycle.name : 'Non défini' }}</td>
+									<td>{{ examan.date ? examan.date|date('d/m/Y') : '' }}</td>
+									<td>{{ examan.heursDebut ? examan.heursDebut|date('H:i') : '' }}</td>
+									<td>{{ examan.heureFin ? examan.heureFin|date('H:i') : '' }}</td>
+									<td>{{ examan.matiere ? examan.matiere.nom : '' }}</td>
+									<td>
+										<div class="d-flex flex-wrap gap-1">
+											{% for item in examan.classe %}
+												<span class="badge text-bg-light border">{{ item.name }}</span>
+											{% endfor %}
+										</div>
+									</td>
+									<td>
+										<div class="d-flex flex-wrap gap-2">
+											<a href="{{ path('app_examen_show', {'id': examan.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+											<a href="{{ path('app_examen_edit', {'id': examan.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+										</div>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="8" class="text-center text-muted py-4">Aucun examen enregistré pour le moment.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

@@ -1,34 +1,63 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Examen{% endblock %}
+{% block title %}Détail de l’examen
+{% endblock %}
 
 {% block body %}
-    <h1>Examen</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Consultation</span>
+				<h1 class="crud-hero__title">Détail de l’examen</h1>
+				<p class="crud-hero__subtitle">Consultez rapidement les informations principales de cette épreuve.</p>
+			</div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ examan.id }}</td>
-            </tr>
-            <tr>
-                <th>Date</th>
-                <td>{{ examan.date ? examan.date|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>HeursDebut</th>
-                <td>{{ examan.heursDebut ? examan.heursDebut|date('H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>HeureFin</th>
-                <td>{{ examan.heureFin ? examan.heureFin|date('H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<table class="table crud-detail-table">
+					<tbody>
+						<tr>
+							<th>Identifiant</th>
+							<td>{{ examan.id }}</td>
+						</tr>
+						<tr>
+							<th>Date</th>
+							<td>{{ examan.date ? examan.date|date('d/m/Y') : '' }}</td>
+						</tr>
+						<tr>
+							<th>Heure de début</th>
+							<td>{{ examan.heursDebut ? examan.heursDebut|date('H:i') : '' }}</td>
+						</tr>
+						<tr>
+							<th>Heure de fin</th>
+							<td>{{ examan.heureFin ? examan.heureFin|date('H:i') : '' }}</td>
+						</tr>
+						<tr>
+							<th>Matière</th>
+							<td>{{ examan.matiere ? examan.matiere.nom : '-' }}</td>
+						</tr>
+						<tr>
+							<th>Classes</th>
+							<td>
+								<div class="d-flex flex-wrap gap-1">
+									{% for item in examan.classe %}
+										<span class="crud-badge">{{ item.name }}</span>
+									{% else %}
+										<span>-</span>
+									{% endfor %}
+								</div>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-    <a href="{{ path('app_examen_index') }}">back to list</a>
-
-    <a href="{{ path('app_examen_edit', {'id': examan.id}) }}">edit</a>
-
-    {{ include('examen/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<div class="d-flex flex-wrap gap-2">
+					<a href="{{ path('app_examen_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+					<a href="{{ path('app_examen_edit', {'id': examan.id}) }}" class="btn btn-outline-primary">Modifier</a>
+				</div>
+				{{ include('examen/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

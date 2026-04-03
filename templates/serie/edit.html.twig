@@ -1,13 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Serie{% endblock %}
+{% block title %}Modifier une série
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Serie</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Mise à jour</span>
+				<h1 class="crud-hero__title">Modifier une série</h1>
+				<p class="crud-hero__subtitle">Mettez à jour le libellé de la série sélectionnée.</p>
+			</div>
 
-    {{ include('serie/_form.html.twig', {'button_label': 'Update'}) }}
+			{{ include('serie/_form.html.twig', {'button_label': 'Mettre à jour', 'finish_path': path('app_serie_index')}) }}
 
-    <a href="{{ path('app_serie_index') }}">back to list</a>
-
-    {{ include('serie/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<a href="{{ path('app_serie_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+				{{ include('serie/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

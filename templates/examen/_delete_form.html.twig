@@ -1,7 +1,7 @@
-<form method="post" action="{{ cycleId is defined and cycleId ? path('app_examen_delete', {'id': examan.id, 'cycle_id': cycleId}) : path('app_examen_delete', {'id': examan.id}) }}" onsubmit="return confirm('Supprimer cet examen ?');">
+<form class="d-inline" method="post" action="{{ cycleId is defined and cycleId ? path('app_examen_delete', {'id': examan.id, 'cycle_id': cycleId}) : path('app_examen_delete', {'id': examan.id}) }}" onsubmit="return confirm('Supprimer cet examen ?');">
 	<input type="hidden" name="_token" value="{{ csrf_token('delete' ~ examan.id) }}">
 	{% if cycleId is defined and cycleId %}
 		<input type="hidden" name="cycle_id" value="{{ cycleId }}">
 	{% endif %}
-	<button class="btn btn-danger">Supprimer</button>
+	<button class="btn btn-outline-danger">Supprimer</button>
 </form>

@@ -1,35 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Matter index{% endblock %}
+{% block title %}Matières
+{% endblock %}
 
 {% block body %}
-    <h1>Matter index</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Pédagogie</span>
+				<h1 class="crud-hero__title">Gestion des matières</h1>
+				<p class="crud-hero__subtitle">Ajoutez, consultez et modifiez les matières utilisées dans la planification des examens et des enseignements.</p>
+			</div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nom</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for matter in matters %}
-            <tr>
-                <td>{{ matter.id }}</td>
-                <td>{{ matter.nom }}</td>
-                <td>
-                    <a href="{{ path('app_matter_show', {'id': matter.id}) }}">show</a>
-                    <a href="{{ path('app_matter_edit', {'id': matter.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<div class="crud-toolbar mb-3">
+					<div>
+						<h2 class="crud-section-title">Liste des matières</h2>
+						<p class="crud-section-text">Organisation simple et rapide du référentiel des matières.</p>
+					</div>
+					<a href="{{ path('app_matter_new') }}" class="btn btn-primary">Ajouter une matière</a>
+				</div>
 
-    <a href="{{ path('app_matter_new') }}">Create new</a>
+				<div class="table-responsive">
+					<table class="table crud-table align-middle">
+						<thead>
+							<tr>
+								<th>Id</th>
+								<th>Nom</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for matter in matters %}
+								<tr>
+									<td>{{ matter.id }}</td>
+									<td>
+										<span class="crud-badge">{{ matter.nom }}</span>
+									</td>
+									<td>
+										<div class="d-flex flex-wrap gap-2">
+											<a href="{{ path('app_matter_show', {'id': matter.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+											<a href="{{ path('app_matter_edit', {'id': matter.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+										</div>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="3" class="crud-empty">Aucune matière enregistrée.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

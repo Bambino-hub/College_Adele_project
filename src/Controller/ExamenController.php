@@ -93,7 +93,7 @@ final class ExamenController extends AbstractController
 
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->setPaper('A3', 'landscape');
         $dompdf->render();
 
         $filename = sprintf('examens_%s.pdf', strtolower(str_replace(' ', '_', $cycle->getName() ?? 'cycle')));
@@ -163,14 +163,25 @@ final class ExamenController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_examen_edit', methods: ['GET', 'POST'], requirements: ['id' => '\d+'])]
-    public function edit(Request $request, Examen $examan, EntityManagerInterface $entityManager): Response
-    {
+    public function edit(
+        Request $request,
+        Examen $examan,
+        EntityManagerInterface $entityManager,
+        CyclesRepository $cyclesRepository
+    ): Response {
         $cycleId = (int) $request->query->get('cycle_id', 0);
         if ($cycleId <= 0) {
             $cycleId = $examan->getCycle()?->getId() ?? 0;
         }
 
-        $form = $this->createForm(ExamenType::class, $examan);
+        $cycle = $examan->getCycle();
+        if ($cycle === null && $cycleId > 0) {
+            $cycle = $cyclesRepository->find($cycleId);
+        }
+
+        $form = $this->createForm(ExamenType::class, $examan, [
+            'cycle' => $cycle,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -187,6 +198,7 @@ final class ExamenController extends AbstractController
             'examan' => $examan,
             'form' => $form,
             'cycleId' => $cycleId,
+            'cycle' => $cycle,
         ]);
     }
 
@@ -369,16 +381,7 @@ final class ExamenController extends AbstractController
 
         $customHeader = trim((string) $request->query->get('entete', ''));
 
-        $periodeLabel = $periode === 'deuxieme' ? 'DEUXIEME PERIODE DE COURS' : 'PREMIERE PERIODE DE COURS';
-        $trimestreLabel = $trimestre === '1' ? 'PREMIER' : 'DEUXIEME';
-
-        $defaultTitle = sprintf(
-            'PROGRAMME DES DEVOIRS DE LA %s DU %s TRIMESTRE %s',
-            $periodeLabel,
-            $trimestreLabel,
-            $anneeScolaire
-        );
-
+        $defaultTitle = 'PROGRAMME DES DEVOIRS';
         $title = $customHeader !== '' ? strtoupper($customHeader) : $defaultTitle;
 
         return [

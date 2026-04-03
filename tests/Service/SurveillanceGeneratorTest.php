@@ -326,6 +326,225 @@ class SurveillanceGeneratorTest extends TestCase
         $this->assertNull($persisted[1]->getStagiaire());
     }
 
+    public function testGenerateKeepsSameSupervisorForTleCAndTleD1AcrossSeparateExams(): void
+    {
+        $cycle2 = (new Cycles())->setName('Cycle 2');
+        $this->setEntityId($cycle2, 2);
+
+        $niveauC = (new Niveau())->setName('Tle C')->setCycle($cycle2);
+        $niveauD1 = (new Niveau())->setName('Tle D1')->setCycle($cycle2);
+        $this->setEntityId($niveauC, 81);
+        $this->setEntityId($niveauD1, 82);
+
+        $classeC = (new ClassName())->setName('Tle C')->setNiveau($niveauC);
+        $classeD1 = (new ClassName())->setName('Tle D1')->setNiveau($niveauD1);
+
+        $math = (new Matter())->setNom('Maths');
+        $svt = (new Matter())->setNom('SVT');
+        $this->setEntityId($math, 601);
+        $this->setEntityId($svt, 602);
+
+        $teacherAli = $this->createTeacher(51, 'Ali', 'Shared', Teatchers::PDF_CYCLE_2);
+        $teacherPaul = $this->createTeacher(52, 'Paul', 'Backup', Teatchers::PDF_CYCLE_2);
+
+        $this->attachTeaching($teacherAli, $math, $classeC);
+        $this->attachTeaching($teacherPaul, $svt, $classeD1);
+
+        $examC = (new Examen())
+            ->setDate(new \DateTime('2026-03-29'))
+            ->setHeursDebut(new \DateTime('07:00:00'))
+            ->setHeureFin(new \DateTime('09:00:00'))
+            ->setMatiere($math)
+            ->setNombreSurveillantsParClasse(1);
+        $examC->addClasse($classeC);
+        $this->setEntityId($examC, 1);
+
+        $examD1 = (new Examen())
+            ->setDate(new \DateTime('2026-03-29'))
+            ->setHeursDebut(new \DateTime('07:00:00'))
+            ->setHeureFin(new \DateTime('09:00:00'))
+            ->setMatiere($svt)
+            ->setNombreSurveillantsParClasse(1);
+        $examD1->addClasse($classeD1);
+        $this->setEntityId($examD1, 2);
+
+        $teacherRepository = $this->createMock(TeatchersRepository::class);
+        $teacherRepository
+            ->expects($this->exactly(2))
+            ->method('findTeachersEligibleForPdfCycleOrderedByGlobalSurveillanceCount')
+            ->with(Teatchers::PDF_CYCLE_2)
+            ->willReturn([$teacherAli, $teacherPaul]);
+        $teacherRepository
+            ->expects($this->atLeastOnce())
+            ->method('isTeacherBusyDuringExam')
+            ->willReturn(false);
+
+        $stagiaireRepository = $this->createMock(StagiaireRepository::class);
+        $stagiaireRepository
+            ->expects($this->exactly(2))
+            ->method('findStagiairesEligibleForCycleOrderedByGlobalSurveillanceCount')
+            ->willReturn([]);
+
+        $persisted = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('persist')->willReturnCallback(function (object $entity) use (&$persisted): void {
+            if ($entity instanceof Surveillance) {
+                $persisted[] = $entity;
+            }
+        });
+        $em->method('remove');
+        $em->expects($this->exactly(2))->method('flush');
+
+        $generator = new SurveillanceGenerator($teacherRepository, $stagiaireRepository, $em);
+        $generator->generate([$examD1, $examC]);
+
+        $this->assertCount(2, $persisted);
+        $this->assertSame($teacherAli, $persisted[0]->getEnseignant());
+        $this->assertSame($teacherAli, $persisted[1]->getEnseignant());
+        $this->assertSame('Tle C', $persisted[0]->getClasse()?->getName());
+        $this->assertSame('Tle D1', $persisted[1]->getClasse()?->getName());
+    }
+
+    public function testGenerateAssignsDifferentSupervisorToTleD2WhenTleCAndTleD1AreAlsoPresent(): void
+    {
+        $cycle2 = (new Cycles())->setName('Cycle 2');
+        $this->setEntityId($cycle2, 2);
+
+        $niveauC = (new Niveau())->setName('Tle C')->setCycle($cycle2);
+        $niveauD1 = (new Niveau())->setName('Tle D1')->setCycle($cycle2);
+        $niveauD2 = (new Niveau())->setName('Tle D2')->setCycle($cycle2);
+        $this->setEntityId($niveauC, 83);
+        $this->setEntityId($niveauD1, 84);
+        $this->setEntityId($niveauD2, 85);
+
+        $classeC = (new ClassName())->setName('Tle C')->setNiveau($niveauC);
+        $classeD1 = (new ClassName())->setName('Tle D1')->setNiveau($niveauD1);
+        $classeD2 = (new ClassName())->setName('Tle D2')->setNiveau($niveauD2);
+
+        $math = (new Matter())->setNom('Maths');
+        $this->setEntityId($math, 603);
+
+        $teacherAli = $this->createTeacher(53, 'Ali', 'Shared', Teatchers::PDF_CYCLE_2);
+        $teacherPaul = $this->createTeacher(54, 'Paul', 'Separate', Teatchers::PDF_CYCLE_2);
+
+        $this->attachTeaching($teacherAli, $math, $classeC);
+        $this->attachTeaching($teacherPaul, $math, $classeD2);
+
+        $exam = (new Examen())
+            ->setDate(new \DateTime('2026-03-29'))
+            ->setHeursDebut(new \DateTime('07:00:00'))
+            ->setHeureFin(new \DateTime('09:00:00'))
+            ->setMatiere($math)
+            ->setNombreSurveillantsParClasse(1);
+        $exam->addClasse($classeC);
+        $exam->addClasse($classeD1);
+        $exam->addClasse($classeD2);
+
+        $teacherRepository = $this->createMock(TeatchersRepository::class);
+        $teacherRepository
+            ->expects($this->once())
+            ->method('findTeachersEligibleForPdfCycleOrderedByGlobalSurveillanceCount')
+            ->with(Teatchers::PDF_CYCLE_2)
+            ->willReturn([$teacherAli, $teacherPaul]);
+        $teacherRepository
+            ->expects($this->atLeastOnce())
+            ->method('isTeacherBusyDuringExam')
+            ->willReturn(false);
+
+        $stagiaireRepository = $this->createMock(StagiaireRepository::class);
+        $stagiaireRepository
+            ->expects($this->once())
+            ->method('findStagiairesEligibleForCycleOrderedByGlobalSurveillanceCount')
+            ->willReturn([]);
+
+        $persisted = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('persist')->willReturnCallback(function (object $entity) use (&$persisted): void {
+            if ($entity instanceof Surveillance) {
+                $persisted[] = $entity;
+            }
+        });
+        $em->method('remove');
+        $em->expects($this->exactly(2))->method('flush');
+
+        $generator = new SurveillanceGenerator($teacherRepository, $stagiaireRepository, $em);
+        $generator->generate([$exam]);
+
+        $this->assertCount(3, $persisted);
+        $this->assertSame($teacherAli, $persisted[0]->getEnseignant());
+        $this->assertSame($teacherAli, $persisted[1]->getEnseignant());
+        $this->assertSame($teacherPaul, $persisted[2]->getEnseignant());
+        $this->assertNotSame($persisted[0]->getEnseignant(), $persisted[2]->getEnseignant());
+    }
+
+    public function testGeneratePrefersTraineeBeforeDomainTeacherWhenNoSubjectSpecialist(): void
+    {
+        $cycle1 = (new Cycles())->setName('Cycle 1');
+        $this->setEntityId($cycle1, 1);
+
+        $niveau3 = (new Niveau())->setName('3eme')->setCycle($cycle1);
+        $this->setEntityId($niveau3, 72);
+
+        $classe3 = (new ClassName())->setName('3eme D')->setNiveau($niveau3);
+
+        $svt = (new Matter())->setNom('SVT');
+        $math = (new Matter())->setNom('MATHS');
+        $this->setEntityId($svt, 491);
+        $this->setEntityId($math, 492);
+
+        $scientificTeacher = $this->createTeacher(40, 'Kouassi', 'Math', Teatchers::PDF_CYCLE_1);
+        $this->attachTeaching($scientificTeacher, $math, $classe3);
+
+        $trainee = $this->createTrainee(409, 'Stag', 'Priority');
+        $trainee->setMatiereDeStage($math);
+
+        $exam = (new Examen())
+            ->setDate(new \DateTime('2026-03-28'))
+            ->setHeursDebut(new \DateTime('07:00:00'))
+            ->setHeureFin(new \DateTime('09:00:00'))
+            ->setMatiere($svt)
+            ->setNombreSurveillantsParClasse(1);
+        $exam->addClasse($classe3);
+
+        $teacherRepository = $this->createMock(TeatchersRepository::class);
+        $teacherRepository
+            ->expects($this->once())
+            ->method('findTeachersEligibleForPdfCycleOrderedByGlobalSurveillanceCount')
+            ->with(Teatchers::PDF_CYCLE_1)
+            ->willReturn([$scientificTeacher]);
+        $teacherRepository
+            ->expects($this->never())
+            ->method('isTeacherBusyDuringExam')
+            ->willReturn(false);
+
+        $stagiaireRepository = $this->createMock(StagiaireRepository::class);
+        $stagiaireRepository
+            ->expects($this->once())
+            ->method('findStagiairesEligibleForCycleOrderedByGlobalSurveillanceCount')
+            ->willReturn([$trainee]);
+        $stagiaireRepository
+            ->expects($this->atLeastOnce())
+            ->method('isTraineeBusyDuringExam')
+            ->willReturn(false);
+
+        $persisted = [];
+        $em = $this->createMock(EntityManagerInterface::class);
+        $em->method('persist')->willReturnCallback(function (object $entity) use (&$persisted): void {
+            if ($entity instanceof Surveillance) {
+                $persisted[] = $entity;
+            }
+        });
+        $em->method('remove');
+        $em->expects($this->exactly(2))->method('flush');
+
+        $generator = new SurveillanceGenerator($teacherRepository, $stagiaireRepository, $em);
+        $generator->generate([$exam]);
+
+        $this->assertCount(1, $persisted);
+        $this->assertSame($trainee, $persisted[0]->getStagiaire());
+        $this->assertNull($persisted[0]->getEnseignant());
+    }
+
     public function testGenerateFallsBackToLiteraryDomainTeacherWhenNoSubjectSpecialist(): void
     {
         $cycle1 = (new Cycles())->setName('Cycle 1');

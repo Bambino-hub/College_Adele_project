@@ -1,13 +1,23 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Niveau{% endblock %}
+{% block title %}Modifier un niveau
+{% endblock %}
 
 {% block body %}
-    <h1>Edit Niveau</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Mise à jour</span>
+				<h1 class="crud-hero__title">Modifier un niveau</h1>
+				<p class="crud-hero__subtitle">Actualisez le libellé du niveau pour refléter l’organisation pédagogique souhaitée.</p>
+			</div>
 
-    {{ include('niveau/_form.html.twig', {'button_label': 'Update'}) }}
+			{{ include('niveau/_form.html.twig', {'button_label': 'Mettre à jour', 'finish_path': path('app_niveau_index')}) }}
 
-    <a href="{{ path('app_niveau_index') }}">back to list</a>
-
-    {{ include('niveau/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<a href="{{ path('app_niveau_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+				{{ include('niveau/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

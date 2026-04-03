@@ -1,9 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Enseignement{% endblock %}
+{% block title %}Créer un enseignement
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Enseignement</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Pédagogie</span>
+				<h1 class="crud-hero__title">Ajouter un enseignement</h1>
+				<p class="crud-hero__subtitle">Associez un enseignant, une matière et une classe dans une interface claire et professionnelle.</p>
+			</div>
 
-    {{ include('enseignement/_form.html.twig', {'finish_path': path('app_enseignement_index')}) }}
+			{{ include('enseignement/_form.html.twig', {'finish_path': path('app_enseignement_index')}) }}
+		</div>
+	</div>
 {% endblock %}

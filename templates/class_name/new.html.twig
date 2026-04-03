@@ -1,14 +1,18 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New ClassName
+{% block title %}Créer une classe
 {% endblock %}
 
 {% block body %}
-	{% for message in app.flashes('success') %}
-		<div class="alert alert-success">{{ message }}</div>
-	{% endfor %}
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Vie scolaire</span>
+				<h1 class="crud-hero__title">Ajouter une classe</h1>
+				<p class="crud-hero__subtitle">Définissez le nom, le cycle, le niveau et la série de la classe à créer.</p>
+			</div>
 
-	<h1>Create new ClassName</h1>
-
-	{{ include('class_name/_form.html.twig', {'finish_path': path('app_class_name_index')}) }}
+			{{ include('class_name/_form.html.twig', {'finish_path': path('app_class_name_index')}) }}
+		</div>
+	</div>
 {% endblock %}

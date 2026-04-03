@@ -1,34 +1,31 @@
 {% extends 'base.html.twig' %}
 
 {% block importmap %}
-
-	{# on charge le js et le css global #}
 	{{ parent() }}
-
-	{# On charge le js et le css des enseignants #}
 	{{ importmap('teachers') }}
 {% endblock %}
 
-
-{% block title %}
-	Ajouter un enseignant
+{% block title %}Ajouter un enseignant
 {% endblock %}
 
 {% block body %}
-	<div class="teachers-page teachers-new">
-		<h1 class="teachers-title">Ajouter un enseignant</h1>
-
-		<a href="{{ path('teatchers_index') }}" class="btn btn-secondary teachers-back-btn">Retour à la liste</a>
-
-		<div
-			class="teachers-form-wrapper">
-
-			{# Le formulaire qui sera directement injecter dans la page des liste des enseignants #}
-			<turbo-frame id="teacher">
-				{{ include('teatchers/_form.html.twig', { 'action': path('teatchers_create') }) }}
-			</turbo-frame>
+<div class="container py-4 crud-page">
+	<div class="crud-shell crud-shell--narrow">
+		<div class="crud-hero">
+			<span class="crud-hero__eyebrow">Ressources humaines</span>
+			<h1 class="crud-hero__title">Ajouter un enseignant</h1>
+			<p class="crud-hero__subtitle">Enregistrez un enseignant avec ses informations administratives et pédagogiques dans une interface plus professionnelle.</p>
 		</div>
 
+		<div class="crud-actions mb-3">
+			<a href="{{ path('teatchers_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+		</div>
 
+		<div class="teachers-form-wrapper">
+			<turbo-frame id="teacher">
+				{{ include('teatchers/_form.html.twig', { 'action': path('teatchers_create'), 'button_label': 'Enregistrer l\'enseignant' }) }}
+				</turbo-frame>
+			</div>
+		</div>
 	</div>
 {% endblock %}

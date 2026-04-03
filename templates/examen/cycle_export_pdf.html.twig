@@ -4,13 +4,18 @@
 		<meta charset="UTF-8">
 		<title>{{ headerConfig.title }}</title>
 		<style>
+			@page {
+				size: A3 landscape;
+				margin: 6mm;
+			}
 			body {
-				font-family: "Times New Roman", Times, serif;
+				font-family: "DejaVu Sans", Arial, sans-serif;
 				font-size: 11px;
 				color: #111;
+				margin: 0;
 			}
 			h2 {
-				font-size: 15px;
+				font-size: 16px;
 				margin: 0;
 				text-align: center;
 				text-transform: uppercase;
@@ -18,7 +23,7 @@
 			}
 			.cycle-line {
 				text-align: center;
-				font-size: 11px;
+				font-size: 12px;
 				margin: 6px 0 14px;
 				color: #333;
 			}
@@ -29,12 +34,14 @@
 			table {
 				width: 100%;
 				border-collapse: collapse;
+				table-layout: auto;
 			}
 			th,
 			td {
 				border: 1px solid #222;
-				padding: 6px;
+				padding: 7px;
 				vertical-align: top;
+				font-size: 11px;
 			}
 			th {
 				background: #f1f1f1;
@@ -47,18 +54,18 @@
 				font-weight: bold;
 				text-transform: uppercase;
 				font-size: 11px;
-				width: 165px;
+				width: 180px;
 			}
 			.slot-cell {
 				font-weight: 600;
 				font-size: 11px;
-				width: 105px;
+				width: 110px;
 				white-space: nowrap;
 			}
 			.entry-line {
-				margin-bottom: 3px;
+				margin-bottom: 4px;
 				border: 1px solid #d9d9d9;
-				padding: 4px 5px;
+				padding: 5px 6px;
 				font-size: 11px;
 			}
 			.entry-line:last-child {
@@ -96,7 +103,8 @@
 						} %}
 						{% for row in programRows %}
 							<tr>
-								<td class="day-cell">{{ dayMap[row.date|date('N')] ?? '' }} {{ row.date|date('d/m/Y') }}</td>
+								<td class="day-cell">{{ dayMap[row.date|date('N')] ?? '' }}
+									{{ row.date|date('d/m/Y') }}</td>
 								<td class="slot-cell">{{ row.slot }}</td>
 								{% for level in orderedLevels %}
 									<td>

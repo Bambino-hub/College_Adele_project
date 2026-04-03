@@ -1,18 +1,35 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Examen
+{% block title %}Modifier un examen
 {% endblock %}
 
 {% block body %}
-	<h1>Edit Examen</h1>
+	<div class="container py-4 examen-page">
+		<div class="exam-shell">
+			<div class="exam-shell__hero exam-shell__hero--soft">
+				<span class="exam-shell__eyebrow">Mise à jour</span>
+				<h1 class="exam-shell__title">Modifier un examen</h1>
+				<p class="exam-shell__subtitle">
+					Ajustez les informations de l’épreuve puis enregistrez les changements.
+				</p>
+			</div>
 
-	{{ include('examen/_form.html.twig', {'button_label': 'Update'}) }}
+			{% set finishPath = cycleId is defined and cycleId ? path('app_examen_cycle_index', {'id': cycleId}) : path('app_examen_index') %}
+			{{ include('examen/_form.html.twig', {'button_label': 'Mettre à jour', 'finish_path': finishPath}) }}
 
-	{% if cycleId is defined and cycleId %}
-		<a href="{{ path('app_examen_cycle_index', {'id': cycleId}) }}">back to cycle exams</a>
-	{% else %}
-		<a href="{{ path('app_examen_index') }}">back to list</a>
-	{% endif %}
+			<div class="exam-shell__footer">
+				{% if cycleId is defined and cycleId %}
+					<a href="{{ path('app_examen_cycle_index', {'id': cycleId}) }}" class="btn btn-outline-secondary">
+						← Retour aux examens du cycle
+					</a>
+				{% else %}
+					<a href="{{ path('app_examen_index') }}" class="btn btn-outline-secondary">
+						← Retour à la liste
+					</a>
+				{% endif %}
 
-	{{ include('examen/_delete_form.html.twig', {'cycleId': cycleId|default(0)}) }}
+				{{ include('examen/_delete_form.html.twig', {'cycleId': cycleId|default(0)}) }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

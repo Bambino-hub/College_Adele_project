@@ -1,35 +1,58 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Niveau index{% endblock %}
+{% block title %}Niveaux
+{% endblock %}
 
 {% block body %}
-    <h1>Niveau index</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell">
+			<div class="crud-hero">
+				<span class="crud-hero__eyebrow">Organisation académique</span>
+				<h1 class="crud-hero__title">Gestion des niveaux</h1>
+				<p class="crud-hero__subtitle">Définissez les niveaux scolaires afin de structurer les classes et les programmations d’examens.</p>
+			</div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for niveau in niveaux %}
-            <tr>
-                <td>{{ niveau.id }}</td>
-                <td>{{ niveau.name }}</td>
-                <td>
-                    <a href="{{ path('app_niveau_show', {'id': niveau.id}) }}">show</a>
-                    <a href="{{ path('app_niveau_edit', {'id': niveau.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<div class="crud-toolbar mb-3">
+					<div>
+						<h2 class="crud-section-title">Niveaux disponibles</h2>
+						<p class="crud-section-text">Une base claire pour le collège et le lycée.</p>
+					</div>
+					<a href="{{ path('app_niveau_new') }}" class="btn btn-primary">Ajouter un niveau</a>
+				</div>
 
-    <a href="{{ path('app_niveau_new') }}">Create new</a>
+				<div class="table-responsive">
+					<table class="table crud-table align-middle">
+						<thead>
+							<tr>
+								<th>Id</th>
+								<th>Nom</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for niveau in niveaux %}
+								<tr>
+									<td>{{ niveau.id }}</td>
+									<td>
+										<span class="crud-badge">{{ niveau.name }}</span>
+									</td>
+									<td>
+										<div class="d-flex flex-wrap gap-2">
+											<a href="{{ path('app_niveau_show', {'id': niveau.id}) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
+											<a href="{{ path('app_niveau_edit', {'id': niveau.id}) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
+										</div>
+									</td>
+								</tr>
+							{% else %}
+								<tr>
+									<td colspan="3" class="crud-empty">Aucun niveau enregistré.</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}

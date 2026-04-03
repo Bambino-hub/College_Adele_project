@@ -173,8 +173,8 @@ class SurveillanceController extends AbstractController
         $normalizedClass = mb_strtolower(trim((string) $className));
 
         if (
-            in_array($normalizedLevel, ['tle c', 'tle d', 'tle d2'], true)
-            || in_array($normalizedClass, ['tle c', 'tle d', 'tle d2'], true)
+            in_array($normalizedLevel, ['tle c', 'tle d1', 'tle d', 'tle d2'], true)
+            || in_array($normalizedClass, ['tle c', 'tle d1', 'tle d', 'tle d2'], true)
         ) {
             return 'Tle D et C';
         }
@@ -187,6 +187,7 @@ class SurveillanceController extends AbstractController
         $normalized = mb_strtolower(trim($className));
 
         return match ($normalized) {
+            'tle d1' => 'Tle D1',
             'tle d2', 'tle d' => 'Tle D2',
             default => $className,
         };
@@ -296,7 +297,7 @@ class SurveillanceController extends AbstractController
         $options->set('defaultFont', 'Times-Roman');
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
-        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->setPaper('A3', 'landscape');
         $dompdf->render();
 
         $filename = sprintf('tableau_surveillance_%s.pdf', strtolower(str_replace(' ', '_', $cycle->getName() ?? 'cycle')));
@@ -331,16 +332,7 @@ class SurveillanceController extends AbstractController
 
         $customHeader = trim((string) $request->query->get('entete', ''));
 
-        $periodeLabel = $periode === 'deuxieme' ? 'DEUXIEME PERIODE DE COURS' : 'PREMIERE PERIODE DE COURS';
-        $trimestreLabel = $trimestre === '1' ? 'PREMIER' : 'DEUXIEME';
-
-        $defaultTitle = sprintf(
-            'PROGRAMME DES SURVEILLANCES DE LA %s DU %s TRIMESTRE %s',
-            $periodeLabel,
-            $trimestreLabel,
-            $anneeScolaire
-        );
-
+        $defaultTitle = 'PROGRAMME DES SURVEILLANCES';
         $title = $customHeader !== '' ? strtoupper($customHeader) : $defaultTitle;
 
         return [

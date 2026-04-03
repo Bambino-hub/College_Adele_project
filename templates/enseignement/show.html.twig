@@ -1,22 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Enseignement{% endblock %}
+{% block title %}Détail de l’enseignement
+{% endblock %}
 
 {% block body %}
-    <h1>Enseignement</h1>
+	<div class="container py-4 crud-page">
+		<div class="crud-shell crud-shell--narrow">
+			<div class="crud-hero crud-hero--soft">
+				<span class="crud-hero__eyebrow">Consultation</span>
+				<h1 class="crud-hero__title">Détail de l’enseignement</h1>
+				<p class="crud-hero__subtitle">Consultez les informations de l’association entre enseignant, matière et classe.</p>
+			</div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ enseignement.id }}</td>
-            </tr>
-        </tbody>
-    </table>
+			<div class="crud-card">
+				<table class="table crud-detail-table">
+					<tbody>
+						<tr>
+							<th>Identifiant</th>
+							<td>{{ enseignement.id }}</td>
+						</tr>
+						<tr>
+							<th>Enseignant</th>
+							<td>{{ enseignement.teacher ? enseignement.teacher.fullName : '-' }}</td>
+						</tr>
+						<tr>
+							<th>Matière</th>
+							<td>{{ enseignement.matter ? enseignement.matter.nom : '-' }}</td>
+						</tr>
+						<tr>
+							<th>Classe</th>
+							<td>{{ enseignement.className ? enseignement.className.name : '-' }}</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 
-    <a href="{{ path('app_enseignement_index') }}">back to list</a>
-
-    <a href="{{ path('app_enseignement_edit', {'id': enseignement.id}) }}">edit</a>
-
-    {{ include('enseignement/_delete_form.html.twig') }}
+			<div class="crud-actions">
+				<div class="d-flex flex-wrap gap-2">
+					<a href="{{ path('app_enseignement_index') }}" class="btn btn-outline-secondary">← Retour à la liste</a>
+					<a href="{{ path('app_enseignement_edit', {'id': enseignement.id}) }}" class="btn btn-outline-primary">Modifier</a>
+				</div>
+				{{ include('enseignement/_delete_form.html.twig') }}
+			</div>
+		</div>
+	</div>
 {% endblock %}

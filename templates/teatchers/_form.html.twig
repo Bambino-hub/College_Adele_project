@@ -1,11 +1,63 @@
-<div class="teachers-form">
-	{{ form_start(form, {'attr': {'class': 'teachers-form-element', 'action': action|default('') }}) }}
-	{{ form_widget(form) }}
+<div class="crud-form-card teachers-form-card">
+	{{ form_start(form, {'attr': {'class': 'crud-form teachers-form-element', 'action': action|default('') }}) }}
 
-	<div class="d-flex gap-3">
-		<button class="btn btn-primary ">{{ button_label|default('Save') }}</button>
-
-		<a href="{{path("teatchers_index")}}" class="btn btn-secondary ">Annuler</a>
+	<div class="teachers-form-section">
+		<h2 class="teachers-section-title">Informations personnelles</h2>
+		<div class="teachers-form-grid">
+			<div class="teachers-field">
+				{{ form_label(form.lastname) }}
+				{{ form_widget(form.lastname, {'attr': {'class': 'form-control', 'placeholder': 'Nom'}}) }}
+				{{ form_errors(form.lastname) }}
+			</div>
+			<div class="teachers-field">
+				{{ form_label(form.firstname) }}
+				{{ form_widget(form.firstname, {'attr': {'class': 'form-control', 'placeholder': 'Prénom'}}) }}
+				{{ form_errors(form.firstname) }}
+			</div>
+			<div class="teachers-field">
+				{{ form_label(form.phoneNumber) }}
+				{{ form_widget(form.phoneNumber, {'attr': {'class': 'form-control', 'placeholder': 'Contact téléphonique'}}) }}
+				{{ form_errors(form.phoneNumber) }}
+			</div>
+			<div class="teachers-field">
+				{{ form_label(form.sexe) }}
+				{{ form_widget(form.sexe, {'attr': {'class': 'form-select'}}) }}
+				{{ form_errors(form.sexe) }}
+			</div>
+		</div>
 	</div>
-	{{ form_end(form) }}
+
+	<div class="teachers-form-section">
+		<h2 class="teachers-section-title">Informations professionnelles</h2>
+		<div class="teachers-form-grid">
+			<div class="teachers-field">
+				{{ form_label(form.matricule) }}
+				{{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'placeholder': 'Matricule si disponible'}}) }}
+				{{ form_errors(form.matricule) }}
+			</div>
+			<div class="teachers-field">
+				{{ form_label(form.statut) }}
+				{{ form_widget(form.statut, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Permanent, Vacataire...'}}) }}
+				{{ form_errors(form.statut) }}
+			</div>
+			<div class="teachers-field teachers-field--full">
+				{{ form_label(form.disciplines) }}
+				{{ form_widget(form.disciplines, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Mathématiques, SVT, Physique...'}}) }}
+				{{ form_errors(form.disciplines) }}
+			</div>
+			<div class="teachers-field teachers-field--full">
+				{{ form_label(form.pdfCycle) }}
+				{{ form_widget(form.pdfCycle, {'attr': {'class': 'form-select'}}) }}
+				{{ form_errors(form.pdfCycle) }}
+			</div>
+		</div>
+	</div>
+
+	{{ form_rest(form) }}
+
+	<div class="crud-actions teachers-form-actions">
+		<button class="btn btn-primary">{{ button_label|default('Enregistrer') }}</button>
+		<a href="{{ path('teatchers_index') }}" class="btn btn-outline-secondary">Annuler</a>
+	</div>
+	{{ form_end(form, {'render_rest': false}) }}
 </div>
